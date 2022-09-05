@@ -2,10 +2,11 @@ from src.tokenizer import Tokenizer
 
 
 class Parser:
+
     def __init__(self):
-        self._lookahead = None
-        self._string = None
+        self._string = ''
         self._tokenizer = None
+        self._lookahead = None
 
     def parse(self, string):
         self._string = string
@@ -16,14 +17,29 @@ class Parser:
     def program(self):
         return {
             'type': 'Program',
-            'body': self.numeric_literal()
+            'body': self.literal()
+        }
+
+    def literal(self):
+        # lookahead = self._lookahead()
+        if self._lookahead['type'] == 'NUMBER':
+            return self.numeric_literal()
+        elif self._lookahead['type'] == 'STRING':
+            return self.string_literal()
+        raise SyntaxError('Literal: unexpected literal production')
+
+    def string_literal(self):
+        token = self._eat('STRING')
+        return {
+            'type': 'StringLiteral',
+            'value': token['value'][1:-1]
         }
 
     def numeric_literal(self):
         token = self._eat('NUMBER')
         return {
             'type': 'NumericLiteral',
-            'value': int(self._string)
+            'value': int(token['value'])
         }
 
     def _eat(self, token_type):
@@ -32,3 +48,5 @@ class Parser:
             raise SyntaxError(f'Unexpected end of input, expected: {token_type}')
         if token_type != token['type']:
             raise SyntaxError(f'Unexpected token: {token["value"]}, expected {token_type}')
+        self._lookahead = self._tokenizer.get_next_token()
+        return token
