@@ -1,3 +1,16 @@
+import re
+
+# Tokenizer spec.
+spec = [
+    # Whitespace
+    [r'^\s+', None],
+    # Numbers
+    [r'^\d+', 'NUMBER'],
+    # Strings
+    [r"^'[^']*'", 'STRING'],
+    [r'^"[^"]*"', 'STRING'],
+]
+
 
 class Tokenizer:
     def __init__(self, string):
@@ -15,33 +28,21 @@ class Tokenizer:
             return None
         string = self._string[self._cursor:]
 
-        # Numbers
-        if string[0].isdigit():
-            number = ''
-            while string[self._cursor].isdigit():
-                number += string[self._cursor]
-                self._cursor += 1
-                if self.is_EOF():
-                    break
-
+        for regexp, token_type in spec:
+            token_value = self._match(regexp, string)
+            if token_value is None:
+                continue
+            if token_type is None:
+                return self.get_next_token()
             return {
-                'type': 'NUMBER',
-                'value': number
+                'type': token_type,
+                'value': token_value
             }
+        raise SyntaxError(f'Unexpected token {string[0]}')
 
-        # Strings
-        if string[0] == '"':
-            s = ''
-            while self._cursor < len(string):
-                s += string[self._cursor]
-                self._cursor += 1
-                if string[self._cursor] == '"' or self.is_EOF():
-                    break
-            s += string[self._cursor]
-            self._cursor += 1
-            return {
-                'type': 'STRING',
-                'value': s
-            }
-
-        return None
+    def _match(self, regexp, string):
+        matched = re.match(regexp, string)
+        if not matched:
+            return None
+        self._cursor += len(matched.group(0))
+        return matched.string
