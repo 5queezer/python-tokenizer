@@ -27,3 +27,24 @@ class ParserTests(unittest.TestCase):
         out = parser.parse(program)
         self.assertEqual({'type': 'Program', 'body': {'type': 'NumericLiteral', 'value': 42}}, out)
 
+    def test_single_line_comment(self):
+        program = """
+        // Number: 42
+        42
+        
+        """
+        parser = Parser()
+        out = parser.parse(program)
+        self.assertEqual({'type': 'Program', 'body': {'type': 'NumericLiteral', 'value': 42}}, out)
+
+    def test_multi_line_comment(self):
+        program = """
+            /**
+             * Documentation comment:
+             */
+             
+            "hello" 
+            """
+        parser = Parser()
+        out = parser.parse(program)
+        self.assertEqual({'type': 'Program', 'body': {'type': 'StringLiteral', 'value': 'hello'}}, out)

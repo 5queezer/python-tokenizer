@@ -4,11 +4,20 @@ import re
 spec = [
     # Whitespace
     [r'^\s+', None],
-    # Numbers
-    [r'^\d+', 'NUMBER'],
+
+    # Comments
+    # Skip single line-comments
+    [r'^\/\/.*', None],
+
+    # Skip multi line-comments
+    [r'^\/\*[\s\S]*?\*\/', None],
+
     # Strings
     [r"^'[^']*'", 'STRING'],
     [r'^"[^"]*"', 'STRING'],
+
+    # Numbers
+    [r'^\d+', 'NUMBER'],
 ]
 
 
@@ -38,11 +47,11 @@ class Tokenizer:
                 'type': token_type,
                 'value': token_value
             }
-        raise SyntaxError(f'Unexpected token {string[0]}')
+        raise SyntaxError(f'Unexpected token: "{string[0]}"')
 
     def _match(self, regexp, string):
         matched = re.match(regexp, string)
         if not matched:
             return None
         self._cursor += len(matched.group(0))
-        return matched.string
+        return matched.group(0)
