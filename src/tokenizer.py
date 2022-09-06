@@ -23,16 +23,13 @@ spec = [
 
 class Tokenizer:
     def __init__(self, string):
-        self._string = string
-        self._cursor = 0
+        self._string: str = string
+        self._cursor: int = 0
 
-    def is_EOF(self):
-        return self._cursor == len(self._string)
-
-    def has_more_tokens(self):
+    def has_more_tokens(self) -> bool:
         return self._cursor < len(self._string)
 
-    def get_next_token(self):
+    def get_next_token(self) -> dict or None:
         if not self.has_more_tokens():
             return None
         string = self._string[self._cursor:]
@@ -49,7 +46,7 @@ class Tokenizer:
             }
         raise SyntaxError(f'Unexpected token: "{string[0]}"')
 
-    def _match(self, regexp, string):
+    def _match(self, regexp, string) -> str or None:
         matched = re.match(regexp, string)
         if not matched:
             return None
