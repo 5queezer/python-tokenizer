@@ -1,5 +1,5 @@
 import {Parser, Program} from '../src/Parser'
-import * as assert from "assert";
+import {expect, test} from '@jest/globals';
 
 test('NumericLiteral', () => {
     const program = '42';
@@ -12,7 +12,7 @@ test('NumericLiteral', () => {
             value: 42,
         },
     }
-    assert.deepEqual(ast, expected)
+    expect(ast).toStrictEqual(expected)
 })
 
 test('StringLiteral', () => {
@@ -26,7 +26,7 @@ test('StringLiteral', () => {
             value: 'hello',
         },
     }
-    assert.deepEqual(ast, expected)
+    expect(ast).toStrictEqual(expected)
 })
 
 test('Single Line Comment', () => {
@@ -43,7 +43,7 @@ test('Single Line Comment', () => {
             value: 42,
         },
     }
-    assert.deepEqual(ast, expected)
+    expect(ast).toStrictEqual(expected)
 })
 
 test('Multi Line Comment', () => {
@@ -63,5 +63,5 @@ test('Multi Line Comment', () => {
             value: 'hello',
         },
     }
-    assert.deepEqual(ast, expected)
+    expect(ast).toStrictEqual(expected)
 })
