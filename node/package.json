@@ -8,7 +8,7 @@
   },
   "directories": {
     "src": "./src",
-    "test": "./tests"
+    "test": "__tests__"
   },
   "exclude": [
     "./tests/",
