@@ -1,10 +1,10 @@
-export type TokenType = {
+export type Token = {
     type: string,
     value: string | number
 }
 
 
-const Spec: [RegExp, TokenType["type"] | null][] = [
+const Spec: [RegExp, Token["type"] | null][] = [
     // Whitespace
     [/^\s+/, null],
 
@@ -35,7 +35,7 @@ export class Tokenizer {
         this._cursor = 0
     }
 
-    public getNextToken(): TokenType {
+    public getNextToken(): Token {
         if (!this._hasMoreTokens()) {
             return null;
         }
@@ -64,7 +64,7 @@ export class Tokenizer {
         return this._cursor === this._string.length
     }
 
-    private _match(regexp: RegExp, string: string): TokenType["value"] | null {
+    private _match(regexp: RegExp, string: string): Token["value"] | null {
         const matched = regexp.exec(string)
         if (matched === null) {
             return null

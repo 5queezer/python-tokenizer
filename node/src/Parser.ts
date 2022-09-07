@@ -1,15 +1,15 @@
 
-import {Tokenizer, TokenType} from "./Tokenizer";
+import {Tokenizer, Token} from "./Tokenizer";
 
 export type Program = {
     type: string,
-    body: TokenType
+    body: Token
 }
 
 export class Parser {
     private _string: string;
     private _tokenizer: Tokenizer;
-    private _lookahead: TokenType;
+    private _lookahead: Token;
 
     constructor() {
         this._string = '';
@@ -37,7 +37,7 @@ export class Parser {
         }
     }
 
-    Literal(): TokenType {
+    Literal(): Token {
         switch (this._lookahead.type) {
             case 'NUMBER': return this.NumericLiteral()
             case 'STRING': return this.StringLiteral()
@@ -45,7 +45,7 @@ export class Parser {
         throw new SyntaxError(`Literal: Unexpected literal production`)
     }
 
-    private _eat(tokenType: string): TokenType {
+    private _eat(tokenType: string): Token {
         const token = this._lookahead
         if (token == null) {
             throw new SyntaxError(`Unexpected end of input, expected "${tokenType}"`)
@@ -59,7 +59,7 @@ export class Parser {
         return token
     }
 
-    private NumericLiteral(): TokenType {
+    private NumericLiteral(): Token {
         const token = this._eat('NUMBER')
         return {
             type: 'NumericLiteral',
@@ -67,7 +67,7 @@ export class Parser {
         }
     }
 
-    private StringLiteral(): TokenType {
+    private StringLiteral(): Token {
         const token = this._eat('STRING')
         return {
             type: 'StringLiteral',
