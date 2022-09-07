@@ -1,51 +1,35 @@
 import unittest
 from src.parser import Parser
+from parameterized import parameterized
 
 
 class ParserTests(unittest.TestCase):
-    def test_number(self):
-        program = '42'
-        parser = Parser()
-        out = parser.parse(program)
-        self.assertEqual({'type': 'Program', 'body': {'type': 'NumericLiteral', 'value': 42}}, out)
+    @parameterized.expand([
+        ["number", "42", {'type': 'NumericLiteral', 'value': 42}],
+        ["string double quote", '"hello"', {'type': 'StringLiteral', 'value': 'hello'}],
+        ["string single quote", "'hello'", {'type': 'StringLiteral', 'value': 'hello'}],
+        ["whitespace", "   42 ", {'type': 'NumericLiteral', 'value': 42}],
 
-    def test_string_double_quote(self):
-        program = '"hello"'
-        parser = Parser()
-        out = parser.parse(program)
-        self.assertEqual({'type': 'Program', 'body': {'type': 'StringLiteral', 'value': 'hello'}}, out)
-
-    def test_string_single_quote(self):
-        program = "'hello'"
-        parser = Parser()
-        out = parser.parse(program)
-        self.assertEqual({'type': 'Program', 'body': {'type': 'StringLiteral', 'value': 'hello'}}, out)
-
-    def test_whitespace(self):
-        program = "   42 "
-        parser = Parser()
-        out = parser.parse(program)
-        self.assertEqual({'type': 'Program', 'body': {'type': 'NumericLiteral', 'value': 42}}, out)
-
-    def test_single_line_comment(self):
-        program = """
+        ["single line comment", """
         // Number: 42
         42
         
-        """
-        parser = Parser()
-        out = parser.parse(program)
-        self.assertEqual({'type': 'Program', 'body': {'type': 'NumericLiteral', 'value': 42}}, out)
+        """,
+         {'type': 'NumericLiteral', 'value': 42}],
 
-    def test_multi_line_comment(self):
-        program = """
+        ["multi line comment", """
             /**
              * Documentation comment:
              */
              
             "hello" 
             
-            """
+            """,
+         {'type': 'StringLiteral', 'value': 'hello'}],
+
+    ])
+    def test_literal(self, name, program, expected):
+
         parser = Parser()
         out = parser.parse(program)
-        self.assertEqual({'type': 'Program', 'body': {'type': 'StringLiteral', 'value': 'hello'}}, out)
+        self.assertEqual({'type': 'Program', 'body': expected},  out, f'Failed: {name}')

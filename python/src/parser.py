@@ -17,7 +17,7 @@ class Parser:
     def program(self) -> dict:
         return {
             'type': 'Program',
-            'body': self.literal()
+            'body': self.statement_list()
         }
 
     def literal(self) -> dict:
