@@ -26,7 +26,7 @@ class Parser:
             'body': self.statement_list()
         }
 
-    def statement_list(self) -> list:
+    def statement_list(self, stop_lookahead=None) -> list:
         """
         StatementList
           : Statement
@@ -34,7 +34,7 @@ class Parser:
           ;
         """
         statement_list = [self.statement()]
-        while self._lookahead is not None:
+        while self._lookahead is not None and self._lookahead['type'] != stop_lookahead:
             statement_list.append(self.statement())
         return statement_list
 
@@ -42,9 +42,34 @@ class Parser:
         """
         Statement
           : ExpressionStatement
+          | BlockStatement
+          | EmptyStatement
           ;
         """
-        return self.expression_statement()
+        if self._lookahead['type'] == ';':
+            return self.empty_statement()
+        elif self._lookahead['type'] == '{':
+            return self.block_statement()
+        else:
+            return self.expression_statement()
+
+    def empty_statement(self):
+        self._eat(';')
+        return {
+            'type': 'EmptyStatement'
+        }
+    def block_statement(self) -> dict:
+        """
+        BlockStatement
+          : '{' OptStatementList '}'
+        """
+        self._eat('{')
+        body = self.statement_list('}') if self._lookahead['type'] != '}' else []
+        self._eat('}')
+        return {
+            'type': 'BlockStatement',
+            'body': body
+        }
 
     def expression_statement(self):
         """
