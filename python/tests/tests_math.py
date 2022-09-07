@@ -26,30 +26,28 @@ class ParserTests(unittest.TestCase):
         # left: 3 + 2
         # right: 2
         ["nested binary expression", "3 + 2 - 2;", [{
-
-                'type': 'ExpressionStatement',
-                'expression': {
+            'type': 'ExpressionStatement',
+            'expression': {
+                'type': 'BinaryExpression',
+                'operator': '-',
+                'left': {
                     'type': 'BinaryExpression',
-                    'operator': '-',
+                    'operator': '+',
                     'left': {
-                        'type': 'BinaryExpression',
-                        'operator': '+',
-                        'left': {
-                            'type': 'NumericLiteral',
-                            'value': 3
-                        },
-                        'right': {
-                            'type': 'NumericLiteral',
-                            'value': 2
-                        },
+                        'type': 'NumericLiteral',
+                        'value': 3
                     },
                     'right': {
                         'type': 'NumericLiteral',
                         'value': 2
                     },
-                }
+                },
+                'right': {
+                    'type': 'NumericLiteral',
+                    'value': 2
+                },
             }
-        ]],
+        }]],
     ])
     def test_statement(self, name, program, expected):
         parser = Parser()
