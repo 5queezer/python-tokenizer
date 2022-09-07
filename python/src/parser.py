@@ -58,6 +58,7 @@ class Parser:
         return {
             'type': 'EmptyStatement'
         }
+
     def block_statement(self) -> dict:
         """
         BlockStatement
@@ -84,13 +85,32 @@ class Parser:
             'expression': expression
         }
 
+    def additive_expression(self):
+        """
+        AdditiveExpression
+          : Literal
+          | AdditiveExpression ADDITIVE_OPERATOR Literal -> Literal ADDITIVE_OPERATOR Literal ADDITIVE_OPERATOR Literal
+          ;
+        """
+        left = self.literal()
+        while self._lookahead['type'] == 'ADDITIVE_OPERATOR':
+            operator = self._eat('ADDITIVE_OPERATOR')['value']
+            right = self.literal()
+            left = {
+                'type': 'BinaryExpression',
+                'operator': operator,
+                'left': left,
+                'right': right
+            }
+        return left
+
     def expression(self):
         """
         Expression
           : Literal
           ;
         """
-        return self.literal()
+        return self.additive_expression()
 
     def literal(self) -> dict:
         """
