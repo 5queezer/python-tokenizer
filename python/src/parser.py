@@ -89,13 +89,15 @@ class Parser:
         """
         AdditiveExpression
           : Literal
+          | MultiplicativeExpression
           | AdditiveExpression ADDITIVE_OPERATOR Literal -> Literal ADDITIVE_OPERATOR Literal ADDITIVE_OPERATOR Literal
           ;
         """
-        left = self.literal()
+        left = self.multiplicative_expression()
+        # operator: +, -
         while self._lookahead['type'] == 'ADDITIVE_OPERATOR':
             operator = self._eat('ADDITIVE_OPERATOR')['value']
-            right = self.literal()
+            right = self.multiplicative_expression()
             left = {
                 'type': 'BinaryExpression',
                 'operator': operator,
@@ -103,6 +105,47 @@ class Parser:
                 'right': right
             }
         return left
+    def multiplicative_expression(self):
+        """
+        MultiplicativeExpression
+          : PrimaryExpression
+          | MultiplicativeExpression MULTIPLICATIVE_OPERATOR PrimaryExpression -> PrimaryExpression MULTIPLICATIVE_OPERATOR
+          ;
+        """
+        left = self.primary_expression()
+        # operator: +, -
+        while self._lookahead['type'] == 'MULTIPLICATIVE_OPERATOR':
+            operator = self._eat('MULTIPLICATIVE_OPERATOR')['value']
+            right = self.primary_expression()
+            left = {
+                'type': 'BinaryExpression',
+                'operator': operator,
+                'left': left,
+                'right': right
+            }
+        return left
+
+    def primary_expression(self):
+        """
+        PrimaryExpression
+          : Literal
+          | ParanthesizedExpression
+          ;
+        """
+        if self._lookahead['type'] == '(':
+            return self.paranthesized_expression()
+        return self.literal()
+
+    def paranthesized_expression(self):
+        """
+        ParanthesizedExpression
+          : '(' Expression ')'
+          ;
+        """
+        self._eat('(')
+        expression = self.expression()
+        self._eat(')')
+        return expression
 
     def expression(self):
         """

@@ -22,12 +22,15 @@ spec = [
     # ----------------------------
     # Symbols, delimiters
     [r'^;', ';'],
-    [r'^{', '{'],
-    [r'^}', '}'],
+    [r'^\{', '{'],
+    [r'^\}', '}'],
+    [r'^\(', '('],
+    [r'^\)', ')'],
 
     # ----------------------------
-    # Math operators
+    # Math operators: +, -
     [r'^[+\-]', 'ADDITIVE_OPERATOR'],
+    [r'^[*\/]', 'MULTIPLICATIVE_OPERATOR'],
 
     # ----------------------------
     # Numbers
