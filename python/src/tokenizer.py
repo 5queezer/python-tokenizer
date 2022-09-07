@@ -5,17 +5,25 @@ spec = [
     # Whitespace
     [r'^\s+', None],
 
+    # ----------------------------
     # Comments
+
     # Skip single line-comments
     [r'^\/\/.*', None],
 
     # Skip multi line-comments
     [r'^\/\*[\s\S]*?\*\/', None],
 
+    # ----------------------------
     # Strings
     [r"^'[^']*'", 'STRING'],
     [r'^"[^"]*"', 'STRING'],
 
+    # ----------------------------
+    # Symbols, delimiters
+    [r'^;', ';'],
+
+    # ----------------------------
     # Numbers
     [r'^\d+', 'NUMBER'],
 ]

@@ -9,6 +9,12 @@ class Parser:
         self._lookahead: dict or None = None
 
     def parse(self, string) -> dict:
+        """
+        Main entry point
+        Program
+          : StatementList
+          ;
+        """
         self._string = string
         self._tokenizer = Tokenizer(string)
         self._lookahead = self._tokenizer.get_next_token()
@@ -20,7 +26,54 @@ class Parser:
             'body': self.statement_list()
         }
 
+    def statement_list(self) -> list:
+        """
+        StatementList
+          : Statement
+          | StatementList Statement -> Statement Statement Statement Statement
+          ;
+        """
+        statement_list = [self.statement()]
+        while self._lookahead is not None:
+            statement_list.append(self.statement())
+        return statement_list
+
+    def statement(self) -> dict:
+        """
+        Statement
+          : ExpressionStatement
+          ;
+        """
+        return self.expression_statement()
+
+    def expression_statement(self):
+        """
+        Statement
+          : ExpressionStatement
+          ;
+        """
+        expression = self.expression()
+        self._eat(';')
+        return {
+            'type': 'ExpressionStatement',
+            'expression': expression
+        }
+
+    def expression(self):
+        """
+        Expression
+          : Literal
+          ;
+        """
+        return self.literal()
+
     def literal(self) -> dict:
+        """
+        Literal
+          : NumericLiteral
+          | StringLiteral
+          ;
+        """
         # lookahead = self._lookahead()
         if self._lookahead['type'] == 'NUMBER':
             return self.numeric_literal()
@@ -29,6 +82,9 @@ class Parser:
         raise SyntaxError('Literal: unexpected literal production')
 
     def string_literal(self) -> dict:
+        """
+        StringLiteral
+        """
         token = self._eat('STRING')
         return {
             'type': 'StringLiteral',
@@ -36,6 +92,9 @@ class Parser:
         }
 
     def numeric_literal(self) -> dict:
+        """
+        NumericLiteral
+        """
         token = self._eat('NUMBER')
         return {
             'type': 'NumericLiteral',
