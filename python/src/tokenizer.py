@@ -27,7 +27,7 @@ spec = [
 
     # ----------------------------
     # Math operators
-    [r'^[+/-]', 'ADDITIVE_OPERATOR'],
+    [r'^[+\-]', 'ADDITIVE_OPERATOR'],
 
     # ----------------------------
     # Numbers
