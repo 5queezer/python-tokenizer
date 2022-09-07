@@ -93,18 +93,11 @@ class Parser:
           | AdditiveExpression ADDITIVE_OPERATOR Literal -> Literal ADDITIVE_OPERATOR Literal ADDITIVE_OPERATOR Literal
           ;
         """
-        left = self.multiplicative_expression()
-        # operator: +, -
-        while self._lookahead['type'] == 'ADDITIVE_OPERATOR':
-            operator = self._eat('ADDITIVE_OPERATOR')['value']
-            right = self.multiplicative_expression()
-            left = {
-                'type': 'BinaryExpression',
-                'operator': operator,
-                'left': left,
-                'right': right
-            }
-        return left
+        return self._binary_expression(
+            'multiplicative_expression',
+            'ADDITIVE_OPERATOR'
+        )
+
     def multiplicative_expression(self):
         """
         MultiplicativeExpression
@@ -112,11 +105,21 @@ class Parser:
           | MultiplicativeExpression MULTIPLICATIVE_OPERATOR PrimaryExpression -> PrimaryExpression MULTIPLICATIVE_OPERATOR
           ;
         """
-        left = self.primary_expression()
+        return self._binary_expression(
+            'primary_expression',
+            'MULTIPLICATIVE_OPERATOR'
+        )
+
+    def _binary_expression(self, builder_name, operator_token) -> dict:
+        """
+        Generic binary expression
+        """
+        left = getattr(self, builder_name)()
+
         # operator: +, -
-        while self._lookahead['type'] == 'MULTIPLICATIVE_OPERATOR':
-            operator = self._eat('MULTIPLICATIVE_OPERATOR')['value']
-            right = self.primary_expression()
+        while self._lookahead['type'] == operator_token:
+            operator = self._eat(operator_token)['value']
+            right = getattr(self, builder_name)()
             left = {
                 'type': 'BinaryExpression',
                 'operator': operator,
