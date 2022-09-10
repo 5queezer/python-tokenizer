@@ -1,4 +1,4 @@
-from src.tokenizer import Tokenizer, TokenType, Token
+from src.tokenizer import Tokenizer, TokenType as t, Token
 
 
 class Parser:
@@ -10,10 +10,7 @@ class Parser:
 
     def parse(self, string) -> dict:
         """
-        Main entry point
-        Program
-          : StatementList
-          ;
+        Parses a string into an AST.
         """
         self._string = string
         self._tokenizer = Tokenizer(string)
@@ -21,6 +18,13 @@ class Parser:
         return self.program()
 
     def program(self) -> dict:
+        """
+        # Main entry point.
+        #
+        # Program
+        #   : StatementList
+        #   ;
+        """
         return {
             'type': 'Program',
             'body': self.statement_list()
@@ -46,14 +50,74 @@ class Parser:
           | EmptyStatement
           ;
         """
-        if self._lookahead.type == TokenType.SEMICOLON:
+        type = self._lookahead.type
+        if type == t.SEMICOLON:
             return self.empty_statement()
-        elif self._lookahead.type == TokenType.OPEN_SQBRACKET:
+        elif type == t.OPEN_SQBRACKET:
             return self.block_statement()
-        return self.expression_statement()
+        elif type == t.LET:
+            return self.variable_statement()
+        else:
+            return self.expression_statement()
+
+    def variable_statement(self) -> dict:
+        """
+        VariableStatement
+          : 'let' VariableDeclarationList
+          ;
+        """
+        self._eat(t.LET)
+        declarations = self.variable_declaration_list()
+        self._eat(t.SEMICOLON)
+        return {
+            'type': 'VariableStatement',
+            'declarations': declarations
+        }
+
+    def variable_declaration_list(self):
+        """
+        VariableDeclarationList
+          : VariableDeclaration
+          | VariableDeclarationList ',' VariableDeclarationList
+          ;
+        """
+        declarations = []
+        while True:
+            declarations.append(self.variable_declaration())
+            if self._lookahead.type == t.COMMA:
+                self._eat(t.COMMA)
+            else:
+                break
+        return declarations
+
+    def variable_declaration(self):
+        """
+        VariableDeclaration
+          : Identifier OptVariableInitializer
+          ;
+        """
+        _id = self.identifier()
+        if self._lookahead.type != t.SEMICOLON and self._lookahead.type != t.COMMA:
+            init = self.variable_initializer()
+        else:
+            init = None
+        return {
+            'type': 'VariableDeclaration',
+            'id': _id,
+            'init': init
+        }
+
+    def variable_initializer(self):
+        """
+        VariableInitializer
+          : SIMPLE_ASSIGN AssignmentExpression
+          ;
+        """
+        self._eat(t.SIMPLE_ASSIGN)
+        return self.assignment_expression()
 
     def empty_statement(self) -> dict:
-        self._eat(TokenType.SEMICOLON)
+        self._eat(t.SEMICOLON)
         return {
             'type': 'EmptyStatement'
         }
@@ -61,11 +125,11 @@ class Parser:
     def block_statement(self) -> dict:
         """
         BlockStatement
-          : '{' OptStatementList TokenType.CLOSE_SQBRACKET
+          : '{' OptStatementList t.CLOSE_SQBRACKET
         """
-        self._eat(TokenType.OPEN_SQBRACKET)
-        body = self.statement_list(TokenType.CLOSE_SQBRACKET) if self._lookahead.type != TokenType.CLOSE_SQBRACKET else []
-        self._eat(TokenType.CLOSE_SQBRACKET)
+        self._eat(t.OPEN_SQBRACKET)
+        body = self.statement_list(t.CLOSE_SQBRACKET) if self._lookahead.type != t.CLOSE_SQBRACKET else []
+        self._eat(t.CLOSE_SQBRACKET)
         return {
             'type': 'BlockStatement',
             'body': body
@@ -78,7 +142,7 @@ class Parser:
           ;
         """
         expression = self.expression()
-        self._eat(TokenType.SEMICOLON)
+        self._eat(t.SEMICOLON)
         return {
             'type': 'ExpressionStatement',
             'expression': expression
@@ -94,7 +158,7 @@ class Parser:
         """
         return self._binary_expression(
             'multiplicative_expression',
-            TokenType.ADDITIVE_OPERATOR
+            t.ADDITIVE_OPERATOR
         )
 
     def multiplicative_expression(self) -> dict:
@@ -106,10 +170,10 @@ class Parser:
         """
         return self._binary_expression(
             'primary_expression',
-            TokenType.MULTIPLICATIVE_OPERATOR
+            t.MULTIPLICATIVE_OPERATOR
         )
 
-    def _binary_expression(self, builder_name, operator_token: TokenType) -> dict:
+    def _binary_expression(self, builder_name, operator_token: t) -> dict:
         """
         Generic binary expression
         """
@@ -137,22 +201,22 @@ class Parser:
         """
         if self._is_literal(self._lookahead.type):
             return self.literal()
-        if self._lookahead.type == TokenType.OPEN_BRACKET:
+        if self._lookahead.type == t.OPEN_BRACKET:
             return self.paranthesized_expression()
         return self.left_hand_side_expression()
 
-    def _is_literal(self, token_type: TokenType) -> bool:
-        return token_type in [TokenType.NUMBER, TokenType.STRING]
+    def _is_literal(self, token_type: t) -> bool:
+        return token_type in [t.NUMBER, t.STRING]
 
     def paranthesized_expression(self) -> dict:
         """
         ParanthesizedExpression
-          : TokenType.OPEN_BRACKET Expression ')'
+          : t.OPEN_BRACKET Expression ')'
           ;
         """
-        self._eat(TokenType.OPEN_BRACKET)
+        self._eat(t.OPEN_BRACKET)
         expression = self.expression()
-        self._eat(TokenType.CLOSE_BRACKET)
+        self._eat(t.CLOSE_BRACKET)
         return expression
 
     def expression(self) -> dict:
@@ -194,7 +258,7 @@ class Parser:
           : IDENTIFIER
           ;
         """
-        name = self._eat(TokenType.IDENTIFIER).value
+        name = self._eat(t.IDENTIFIER).value
         return {
             'type': 'Identifier',
             'name': name
@@ -211,12 +275,12 @@ class Parser:
 
     @staticmethod
     def _is_assignment_operator(token_type) -> bool:
-        return token_type in [TokenType.SIMPLE_ASSIGN, TokenType.COMPLEX_ASSIGN]
+        return token_type in [t.SIMPLE_ASSIGN, t.COMPLEX_ASSIGN]
 
     def assignment_operator(self) -> Token:
-        if self._lookahead.type == TokenType.SIMPLE_ASSIGN:
-            return self._eat(TokenType.SIMPLE_ASSIGN)
-        return self._eat(TokenType.COMPLEX_ASSIGN)
+        if self._lookahead.type == t.SIMPLE_ASSIGN:
+            return self._eat(t.SIMPLE_ASSIGN)
+        return self._eat(t.COMPLEX_ASSIGN)
 
     def literal(self) -> dict:
         """
@@ -226,9 +290,9 @@ class Parser:
           ;
         """
         # lookahead = self._lookahead()
-        if self._lookahead.type == TokenType.NUMBER:
+        if self._lookahead.type == t.NUMBER:
             return self.numeric_literal()
-        elif self._lookahead.type == TokenType.STRING:
+        elif self._lookahead.type == t.STRING:
             return self.string_literal()
         raise SyntaxError('Literal: unexpected literal production')
 
@@ -236,7 +300,7 @@ class Parser:
         """
         StringLiteral
         """
-        token = self._eat(TokenType.STRING)
+        token = self._eat(t.STRING)
         return {
             'type': 'StringLiteral',
             'value': token.value[1:-1]
@@ -246,13 +310,13 @@ class Parser:
         """
         NumericLiteral
         """
-        token = self._eat(TokenType.NUMBER)
+        token = self._eat(t.NUMBER)
         return {
             'type': 'NumericLiteral',
             'value': int(token.value)
         }
 
-    def _eat(self, token_type: TokenType) -> Token:
+    def _eat(self, token_type: t) -> Token:
         token = self._lookahead
         if token is None:
             raise SyntaxError(f'Unexpected end of input, expected: {token_type}')

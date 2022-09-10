@@ -16,6 +16,8 @@ class TokenType(Enum):
     CLOSE_SQBRACKET = auto()
     OPEN_BRACKET = auto()
     CLOSE_BRACKET = auto()
+    LET = auto()
+    COMMA = auto()
 
 
 class Token(NamedTuple):
@@ -24,49 +26,54 @@ class Token(NamedTuple):
 
 
 # Tokenizer spec.
-spec: list[re.Pattern, TokenType or None] = [
+spec: list[tuple[re.Pattern, TokenType or None]] = [
     # Whitespace
-    [r'^\s+', None],
+    (r'\s+', None),
 
     # ----------------------------
     # Comments
 
     # Skip single line-comments
-    [r'^\/\/.*', None],
+    (r'\/\/.*', None),
 
     # Skip multi line-comments
-    [r'^\/\*[\s\S]*?\*\/', None],
+    (r'\/\*[\s\S]*?\*\/', None),
 
     # ----------------------------
     # Strings
-    [r"^'[^']*'", TokenType.STRING],
-    [r'^"[^"]*"', TokenType.STRING],
+    (r"'[^']*'", TokenType.STRING),
+    (r'"[^"]*"', TokenType.STRING),
 
     # ----------------------------
     # Symbols, delimiters
-    [r'^;', TokenType.SEMICOLON],
-    [r'^\{', TokenType.OPEN_SQBRACKET],
-    [r'^\}', TokenType.CLOSE_SQBRACKET],
-    [r'^\(', TokenType.OPEN_BRACKET],
-    [r'^\)', TokenType.CLOSE_BRACKET],
+    (r';', TokenType.SEMICOLON),
+    (r'\{', TokenType.OPEN_SQBRACKET),
+    (r'\}', TokenType.CLOSE_SQBRACKET),
+    (r'\(', TokenType.OPEN_BRACKET),
+    (r'\)', TokenType.CLOSE_BRACKET),
+    (r',', TokenType.COMMA),
+
+    # ----------------------------
+    # Keywords
+    (r'\blet\b', TokenType.LET),
 
     # ----------------------------
     # Numbers
-    [r'^\d+', TokenType.NUMBER],
+    (r'\d+', TokenType.NUMBER),
 
     # ----------------------------
     # Identifiers:
-    [r'^[a-zA-Z_]\w*', TokenType.IDENTIFIER],
+    (r'[a-zA-Z_]\w*', TokenType.IDENTIFIER),
 
     # ----------------------------
     # Assignment operators =, *=, /=, +=, -=
-    [r'^=', TokenType.SIMPLE_ASSIGN],
-    [r'^[\*\/\+\-]=', TokenType.COMPLEX_ASSIGN],
+    (r'=', TokenType.SIMPLE_ASSIGN),
+    (r'[\*\/\+\-]=', TokenType.COMPLEX_ASSIGN),
 
     # ----------------------------
     # Math operators: +, -
-    [r'^[+\-]', TokenType.ADDITIVE_OPERATOR],
-    [r'^[*\/]', TokenType.MULTIPLICATIVE_OPERATOR],
+    (r'[+\-]', TokenType.ADDITIVE_OPERATOR),
+    (r'[*\/]', TokenType.MULTIPLICATIVE_OPERATOR),
 
 ]
 
@@ -94,7 +101,7 @@ class Tokenizer:
         raise SyntaxError(f'Unexpected token: "{string[0]}"')
 
     def _match(self, regexp, string) -> str or None:
-        matched = re.match(regexp, string)
+        matched = re.match('^' + regexp, string)
         if not matched:
             return None
         self._cursor += len(matched.group(0))
