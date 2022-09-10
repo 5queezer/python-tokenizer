@@ -11,11 +11,11 @@ class TokenType(Enum):
     COMPLEX_ASSIGN = auto()
     ADDITIVE_OPERATOR = auto()
     MULTIPLICATIVE_OPERATOR = auto()
-    SEMICOLON = ';'
-    OPEN_SQBRACKET = '{'
-    CLOSE_SQBRACKET = '}'
-    OPEN_BRACKET = '('
-    CLOSE_BRACKET = ')'
+    SEMICOLON = auto()
+    OPEN_SQBRACKET = auto()
+    CLOSE_SQBRACKET = auto()
+    OPEN_BRACKET = auto()
+    CLOSE_BRACKET = auto()
 
 
 class Token(NamedTuple):
