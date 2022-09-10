@@ -1,7 +1,30 @@
 import re
+from typing import NamedTuple
+from enum import Enum, auto
+
+
+class TokenType(Enum):
+    STRING = auto()
+    NUMBER = auto()
+    IDENTIFIER = auto()
+    SIMPLE_ASSIGN = auto()
+    COMPLEX_ASSIGN = auto()
+    ADDITIVE_OPERATOR = auto()
+    MULTIPLICATIVE_OPERATOR = auto()
+    SEMICOLON = ';'
+    OPEN_SQBRACKET = '{'
+    CLOSE_SQBRACKET = '}'
+    OPEN_BRACKET = '('
+    CLOSE_BRACKET = ')'
+
+
+class Token(NamedTuple):
+    type: TokenType or None
+    value: str
+
 
 # Tokenizer spec.
-spec = [
+spec: list[re.Pattern, TokenType or None] = [
     # Whitespace
     [r'^\s+', None],
 
@@ -16,34 +39,34 @@ spec = [
 
     # ----------------------------
     # Strings
-    [r"^'[^']*'", 'STRING'],
-    [r'^"[^"]*"', 'STRING'],
+    [r"^'[^']*'", TokenType.STRING],
+    [r'^"[^"]*"', TokenType.STRING],
 
     # ----------------------------
     # Symbols, delimiters
-    [r'^;', ';'],
-    [r'^\{', '{'],
-    [r'^\}', '}'],
-    [r'^\(', '('],
-    [r'^\)', ')'],
+    [r'^;', TokenType.SEMICOLON],
+    [r'^\{', TokenType.OPEN_SQBRACKET],
+    [r'^\}', TokenType.CLOSE_SQBRACKET],
+    [r'^\(', TokenType.OPEN_BRACKET],
+    [r'^\)', TokenType.CLOSE_BRACKET],
 
     # ----------------------------
     # Numbers
-    [r'^\d+', 'NUMBER'],
+    [r'^\d+', TokenType.NUMBER],
 
     # ----------------------------
     # Identifiers:
-    [r'^\w+', 'IDENTIFIER'],
+    [r'^[a-zA-Z_]\w*', TokenType.IDENTIFIER],
 
     # ----------------------------
     # Assignment operators =, *=, /=, +=, -=
-    [r'^=', 'SIMPLE_ASSIGN'],
-    [r'^[\*\/\+\-]=', 'COMPLEX_ASSIGN'],
+    [r'^=', TokenType.SIMPLE_ASSIGN],
+    [r'^[\*\/\+\-]=', TokenType.COMPLEX_ASSIGN],
 
     # ----------------------------
     # Math operators: +, -
-    [r'^[+\-]', 'ADDITIVE_OPERATOR'],
-    [r'^[*\/]', 'MULTIPLICATIVE_OPERATOR'],
+    [r'^[+\-]', TokenType.ADDITIVE_OPERATOR],
+    [r'^[*\/]', TokenType.MULTIPLICATIVE_OPERATOR],
 
 ]
 
@@ -56,7 +79,7 @@ class Tokenizer:
     def has_more_tokens(self) -> bool:
         return self._cursor < len(self._string)
 
-    def get_next_token(self) -> dict or None:
+    def get_next_token(self) -> Token or None:
         if not self.has_more_tokens():
             return None
         string = self._string[self._cursor:]
@@ -67,10 +90,7 @@ class Tokenizer:
                 continue
             if token_type is None:
                 return self.get_next_token()
-            return {
-                'type': token_type,
-                'value': token_value
-            }
+            return Token(type=token_type, value=token_value)
         raise SyntaxError(f'Unexpected token: "{string[0]}"')
 
     def _match(self, regexp, string) -> str or None:
