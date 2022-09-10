@@ -28,13 +28,23 @@ spec = [
     [r'^\)', ')'],
 
     # ----------------------------
+    # Numbers
+    [r'^\d+', 'NUMBER'],
+
+    # ----------------------------
+    # Identifiers:
+    [r'^\w+', 'IDENTIFIER'],
+
+    # ----------------------------
+    # Assignment operators =, *=, /=, +=, -=
+    [r'^=', 'SIMPLE_ASSIGN'],
+    [r'^[\*\/\+\-]=', 'COMPLEX_ASSIGN'],
+
+    # ----------------------------
     # Math operators: +, -
     [r'^[+\-]', 'ADDITIVE_OPERATOR'],
     [r'^[*\/]', 'MULTIPLICATIVE_OPERATOR'],
 
-    # ----------------------------
-    # Numbers
-    [r'^\d+', 'NUMBER'],
 ]
 
 

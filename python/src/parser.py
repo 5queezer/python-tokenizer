@@ -50,10 +50,9 @@ class Parser:
             return self.empty_statement()
         elif self._lookahead['type'] == '{':
             return self.block_statement()
-        else:
-            return self.expression_statement()
+        return self.expression_statement()
 
-    def empty_statement(self):
+    def empty_statement(self) -> dict:
         self._eat(';')
         return {
             'type': 'EmptyStatement'
@@ -72,7 +71,7 @@ class Parser:
             'body': body
         }
 
-    def expression_statement(self):
+    def expression_statement(self) -> dict:
         """
         Statement
           : ExpressionStatement
@@ -85,7 +84,7 @@ class Parser:
             'expression': expression
         }
 
-    def additive_expression(self):
+    def additive_expression(self) -> dict:
         """
         AdditiveExpression
           : Literal
@@ -98,7 +97,7 @@ class Parser:
             'ADDITIVE_OPERATOR'
         )
 
-    def multiplicative_expression(self):
+    def multiplicative_expression(self) -> dict:
         """
         MultiplicativeExpression
           : PrimaryExpression
@@ -128,18 +127,24 @@ class Parser:
             }
         return left
 
-    def primary_expression(self):
+    def primary_expression(self) -> dict:
         """
         PrimaryExpression
           : Literal
           | ParanthesizedExpression
+          | LeftHandSideExpression
           ;
         """
+        if self._is_literal(self._lookahead['type']):
+            return self.literal()
         if self._lookahead['type'] == '(':
             return self.paranthesized_expression()
-        return self.literal()
+        return self.left_hand_side_expression()
 
-    def paranthesized_expression(self):
+    def _is_literal(self, token_type):
+        return token_type in ['NUMBER', 'STRING']
+
+    def paranthesized_expression(self) -> dict:
         """
         ParanthesizedExpression
           : '(' Expression ')'
@@ -150,13 +155,68 @@ class Parser:
         self._eat(')')
         return expression
 
-    def expression(self):
+    def expression(self) -> dict:
         """
         Expression
           : Literal
           ;
         """
-        return self.additive_expression()
+        return self.assignment_expression()
+
+    def assignment_expression(self) -> dict:
+        """
+        AssignmentExpression
+          : AdditiveExpression
+          | LeftHandSideExpression AssignmentOperator AssignmentExpression
+          ;
+        """
+        left = self.additive_expression()
+        if not self._is_assignment_operator(self._lookahead['type']):
+            return left
+        return {
+            'type': 'AssignmentExpression',
+            'operator': self.assignment_operator()['value'],
+            'left': self._check_valid_assignment_target(left),
+            'right': self.assignment_expression()
+        }
+
+    def left_hand_side_expression(self):
+        """
+        LeftHandSideExpression
+          : Identifier
+          ;
+        """
+        return self.identifier()
+
+    def identifier(self):
+        """
+        Identifier
+          : IDENTIFIER
+          ;
+        """
+        name = self._eat('IDENTIFIER')['value']
+        return {
+            'type': 'Identifier',
+            'name': name
+        }
+
+    @staticmethod
+    def _check_valid_assignment_target(node):
+        """
+        Extra check whether it's a valid assignment target
+        """
+        if node['type'] == 'Identifier':
+            return node
+        raise SyntaxError('Invalid left-hand side in assignment expression')
+
+    @staticmethod
+    def _is_assignment_operator(token_type):
+        return token_type in ['SIMPLE_ASSIGN', 'COMPLEX_ASSIGN']
+
+    def assignment_operator(self):
+        if self._lookahead['type'] == 'SIMPLE_ASSIGN':
+            return self._eat('SIMPLE_ASSIGN')
+        return self._eat('COMPLEX_ASSIGN')
 
     def literal(self) -> dict:
         """
