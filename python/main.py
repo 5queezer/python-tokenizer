@@ -5,15 +5,22 @@ from src.parser import Parser
 if __name__ == '__main__':
     parser = Parser()
     input = '''
-    def square() {
+    let s = "Hello, world";
+    let i = 0;
     
+    while (i < s.length) {
+        s[i];
+        // console.log(i, s[i]);
+        i += 1;
     }
+
     '''
     output = parser.parse(input)
     test = {
         'input': input,
         'output': output
     }
-    print(yaml.dump(test, sort_keys=False))
+    print(input)
+    print(yaml.dump(output, sort_keys=False))
     # print(json.dumps(test, indent=2))
 

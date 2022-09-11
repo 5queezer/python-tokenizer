@@ -29,7 +29,7 @@ class RunnerTests(unittest.TestCase):
         print('❌', name, end='', file=sys.stderr)
         try:
             output = self.parser.parse(inp)
-            self.assertEqual(expected, output, msg=f'Error in {name}')
+            self.assertEqual(expected, output)
             print('\r✅', name, file=sys.stderr)
         except Exception as ex:
             print(file=sys.stderr)

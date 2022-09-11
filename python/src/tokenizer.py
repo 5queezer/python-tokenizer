@@ -33,6 +33,7 @@ class TokenType(Enum):
     DEF = auto()
     RETURN = auto()
     COMMA = auto()
+    DOT = auto()
 
     LSQB = auto()
     RSQB = auto()
@@ -70,6 +71,9 @@ spec: list[tuple[re.Pattern, TokenType or None]] = [
     (r'\(', TokenType.LPAR),
     (r'\)', TokenType.RPAR),
     (r',', TokenType.COMMA),
+    (r'\.', TokenType.DOT),
+    (r'\[', TokenType.LSQB),
+    (r'\]', TokenType.RSQB),
 
     # ----------------------------
     # Keywords

@@ -483,10 +483,44 @@ class Parser:
     def left_hand_side_expression(self):
         """
         LeftHandSideExpression
-          : Identifier
+          : MemberExpression
           ;
         """
-        return self.primary_expression()
+        return self.member_expression()
+
+    def member_expression(self):
+        """
+        MemberExpression
+          : PrimaryExpression
+          | MemberExpression '.' Identifier
+          | MemberExpression '[' Expression ']'
+          ;
+        """
+
+        _object = self.primary_expression()
+        while self._lookahead.type == t.DOT or self._lookahead.type == t.LSQB:
+            # MemberExpression '.' Identifier
+            if self._lookahead.type == t.DOT:
+                self._eat(t.DOT)
+                _property = self.identifier()
+                _object = {
+                    'type': 'MemberExpression',
+                    'computed': False,
+                    'object': _object,
+                    'property': _property
+                }
+
+            if self._lookahead.type == t.LSQB:
+                self._eat(t.LSQB)
+                _property = self.expression()
+                self._eat(t.RSQB)
+                _object = {
+                    'type': 'MemberExpression',
+                    'computed': True,
+                    'object': _object,
+                    'property': _property
+                }
+        return _object
 
     def identifier(self):
         """
@@ -505,7 +539,7 @@ class Parser:
         """
         Extra check whether it's a valid assignment target
         """
-        if node['type'] == 'Identifier':
+        if node['type'] == 'Identifier' or node['type'] == 'MemberExpression':
             return node
         raise SyntaxError('Invalid left-hand side in assignment expression')
 
