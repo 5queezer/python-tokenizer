@@ -73,7 +73,7 @@ spec: list[tuple[re.Pattern, TokenType or None]] = [
     (r'\belse\b', TokenType.ELSE),
     (r'\btrue\b', TokenType.TRUE),
     (r'\bfalse\b', TokenType.FALSE),
-    (r'\bnukk\b', TokenType.NULL),
+    (r'\bnull\b', TokenType.NULL),
 
     # ----------------------------
     # Numbers
