@@ -1,4 +1,5 @@
 from src.tokenizer import Tokenizer, TokenType as t, Token
+import tokenize
 
 
 class Parser:
@@ -53,9 +54,9 @@ class Parser:
           ;
         """
         _type = self._lookahead.type
-        if _type == t.SEMICOLON:
+        if _type == t.SEMI:
             return self.empty_statement()
-        elif _type == t.OPEN_CURLY_BRACE:
+        elif _type == t.LBRACE:
             return self.block_statement()
         elif _type == t.LET:
             return self.variable_statement()
@@ -72,9 +73,9 @@ class Parser:
           ;
         """
         self._eat(t.IF)
-        self._eat(t.OPEN_BRACE)
+        self._eat(t.LPAR)
         test = self.expression()
-        self._eat(t.CLOSE_BRACE)
+        self._eat(t.RPAR)
         consequent = self.statement()
 
         alternate = self._eat(t.ELSE) and self.statement() \
@@ -95,7 +96,7 @@ class Parser:
         """
         self._eat(t.LET)
         declarations = self.variable_declaration_list()
-        self._eat(t.SEMICOLON)
+        self._eat(t.SEMI)
         return {
             'type': 'VariableStatement',
             'declarations': declarations
@@ -124,7 +125,7 @@ class Parser:
           ;
         """
         _id = self.identifier()
-        if self._lookahead.type != t.SEMICOLON and self._lookahead.type != t.COMMA:
+        if self._lookahead.type != t.SEMI and self._lookahead.type != t.COMMA:
             init = self.variable_initializer()
         else:
             init = None
@@ -144,7 +145,7 @@ class Parser:
         return self.assignment_expression()
 
     def empty_statement(self) -> dict:
-        self._eat(t.SEMICOLON)
+        self._eat(t.SEMI)
         return {
             'type': 'EmptyStatement'
         }
@@ -154,9 +155,9 @@ class Parser:
         BlockStatement
           : '{' OptStatementList '}'
         """
-        self._eat(t.OPEN_CURLY_BRACE)
-        body = self.statement_list(t.CLOSE_CURLY_BRACE) if self._lookahead.type != t.CLOSE_CURLY_BRACE else []
-        self._eat(t.CLOSE_CURLY_BRACE)
+        self._eat(t.LBRACE)
+        body = self.statement_list(t.RBRACE) if self._lookahead.type != t.RBRACE else []
+        self._eat(t.RBRACE)
         return {
             'type': 'BlockStatement',
             'body': body
@@ -169,7 +170,7 @@ class Parser:
           ;
         """
         expression = self.expression()
-        self._eat(t.SEMICOLON)
+        self._eat(t.SEMI)
         return {
             'type': 'ExpressionStatement',
             'expression': expression
@@ -228,7 +229,7 @@ class Parser:
         """
         if self._is_literal(self._lookahead.type):
             return self.literal()
-        if self._lookahead.type == t.OPEN_BRACE:
+        if self._lookahead.type == t.LPAR:
             return self.paranthesized_expression()
         return self.left_hand_side_expression()
 
@@ -239,12 +240,12 @@ class Parser:
     def paranthesized_expression(self) -> dict:
         """
         ParanthesizedExpression
-          : t.OPEN_BRACE Expression ')'
+          : t.LPAR Expression ')'
           ;
         """
-        self._eat(t.OPEN_BRACE)
+        self._eat(t.LPAR)
         expression = self.expression()
-        self._eat(t.CLOSE_BRACE)
+        self._eat(t.RPAR)
         return expression
 
     def expression(self) -> dict:

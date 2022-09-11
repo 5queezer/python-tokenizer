@@ -11,15 +11,18 @@ class TokenType(Enum):
     COMPLEX_ASSIGN = auto()
     ADDITIVE_OPERATOR = auto()
     MULTIPLICATIVE_OPERATOR = auto()
-    SEMICOLON = auto()
-    OPEN_CURLY_BRACE = auto()
-    CLOSE_CURLY_BRACE = auto()
-    OPEN_BRACE = auto()
-    CLOSE_BRACE = auto()
+    SEMI = auto()
+    LBRACE = auto()
+    RBRACE = auto()
+    LPAR = auto()
+    RPAR = auto()
     LET = auto()
     IF = auto()
     ELSE = auto()
     COMMA = auto()
+
+    LSQB = auto()
+    RSQB = auto()
 
 
 class Token(NamedTuple):
@@ -48,11 +51,11 @@ spec: list[tuple[re.Pattern, TokenType or None]] = [
 
     # ----------------------------
     # Symbols, delimiters
-    (r';', TokenType.SEMICOLON),
-    (r'\{', TokenType.OPEN_CURLY_BRACE),
-    (r'\}', TokenType.CLOSE_CURLY_BRACE),
-    (r'\(', TokenType.OPEN_BRACE),
-    (r'\)', TokenType.CLOSE_BRACE),
+    (r';', TokenType.SEMI),
+    (r'\{', TokenType.LBRACE),
+    (r'\}', TokenType.RBRACE),
+    (r'\(', TokenType.LPAR),
+    (r'\)', TokenType.RPAR),
     (r',', TokenType.COMMA),
 
     # ----------------------------
