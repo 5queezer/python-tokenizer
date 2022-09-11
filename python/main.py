@@ -5,7 +5,9 @@ from src.parser import Parser
 if __name__ == '__main__':
     parser = Parser()
     input = '''
-    +x * -10;
+    for (;;) {
+    
+    }
     '''
     output = parser.parse(input)
     test = {

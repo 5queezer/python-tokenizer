@@ -121,6 +121,45 @@ class Parser:
             'test': test,
             'body': body
         }
+    
+    def for_statement(self):
+        """
+        ForStatement
+          : 'for' '(' OptForStatementInit ';' OptExpression ';' OptExpression ')' Statement
+          ;
+        """
+        self._eat(t.FOR)
+        self._eat(t.LPAR)
+
+        init = self.for_statement_init() if self._lookahead.type != t.SEMI else None
+        self._eat(t.SEMI)
+
+        test = self.expression() if self._lookahead.type != t.SEMI else None
+        self._eat(t.SEMI)
+
+        update = self.expression() if self._lookahead.type != t.RPAR else None
+        self._eat(t.RPAR)
+
+        body = self.statement()
+
+        return {
+            'type': 'ForStatement',
+            'init': init,
+            'test': test,
+            'update': update,
+            'body': body
+        }
+
+    def for_statement_init(self):
+        """
+        ForStatementInit
+          : VariableStatementInit
+          | Expression
+          ;
+        """
+        if self._lookahead.type == t.LET:
+            return self.variable_statement_init()
+        return self.expression()
 
     def if_statement(self):
         """
@@ -145,19 +184,28 @@ class Parser:
             'alternate': alternate
         }
 
-    def variable_statement(self) -> dict:
+    def variable_statement_init(self):
         """
-        VariableStatement
+        VariableStatementInit
           : 'let' VariableDeclarationList
           ;
         """
         self._eat(t.LET)
         declarations = self.variable_declaration_list()
-        self._eat(t.SEMI)
         return {
             'type': 'VariableStatement',
             'declarations': declarations
         }
+
+    def variable_statement(self) -> dict:
+        """
+        VariableStatement
+          : 'VariableDeclarationInit ';'
+          ;
+        """
+        variable_statement = self.variable_statement_init()
+        self._eat(t.SEMI)
+        return variable_statement
 
     def variable_declaration_list(self):
         """
