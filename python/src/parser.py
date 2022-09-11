@@ -52,6 +52,8 @@ class Parser:
           | VariableStatement
           | IfStatement
           | IterationStatement
+          | FunctionDeclaration
+          | ReturnStatement
           ;
         """
         match self._lookahead.type:
@@ -61,12 +63,67 @@ class Parser:
                 return self.block_statement()
             case t.LET:
                 return self.variable_statement()
+            case t.DEF:
+                return self.function_declaration()
+            case t.RETURN:
+                return self.return_statement()
             case t.IF:
                 return self.if_statement()
             case t.WHILE | t.DO | t.FOR:
                 return self.iteration_statement()
             case _:
                 return self.expression_statement()
+
+    def function_declaration(self):
+        """
+        FunctionDeclaration
+          : 'def' Identifier '(' OptFormalParameterList ')' BlockStatement
+          ;
+        """
+        self._eat(t.DEF)
+        name = self.identifier()
+        self._eat(t.LPAR)
+        params = self.formal_parameter_list() if self._lookahead.type != t.RPAR else []
+        self._eat(t.RPAR)
+        body = self.block_statement()
+        return {
+            'type': 'FunctionDeclaration',
+            'name': name,
+            'params': params,
+            'body': body
+        }
+
+    def formal_parameter_list(self):
+        """
+        FormalParameterList
+            : Identifier
+            | FormalParameterList ',' Identifier
+            ;
+        """
+        params = []
+
+        while True:
+            params.append(self.identifier())
+            if self._lookahead.type != t.COMMA:
+                break
+            self._eat(t.COMMA)
+
+        return params
+
+    def return_statement(self):
+        """
+        ReturnStatement
+          : 'return' OptExpression ';'
+          ;
+        """
+        self._eat(t.RETURN)
+        argument = self.expression() if self._lookahead.type != t.SEMI else None
+        self._eat(t.SEMI)
+        return {
+            'type': 'ReturnStatement',
+            'argument': argument
+        }
+
 
     def iteration_statement(self):
         """

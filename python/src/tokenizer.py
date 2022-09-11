@@ -30,6 +30,8 @@ class TokenType(Enum):
     WHILE = auto()
     DO = auto()
     FOR = auto()
+    DEF = auto()
+    RETURN = auto()
     COMMA = auto()
 
     LSQB = auto()
@@ -80,6 +82,8 @@ spec: list[tuple[re.Pattern, TokenType or None]] = [
     (r'\bwhile\b', TokenType.WHILE),
     (r'\bdo\b', TokenType.DO),
     (r'\bfor\b', TokenType.FOR),
+    (r'\bdef\b', TokenType.DEF),
+    (r'\breturn\b', TokenType.RETURN),
 
     # ----------------------------
     # Numbers
