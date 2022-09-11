@@ -1,24 +1,25 @@
+import os
 import sys
 import unittest
 import yaml
 import glob
-
 from parameterized import parameterized
-
 from src.parser import Parser
 
-tests = []
-for file in glob.glob('*.yaml'):
-    with open(file, "r") as stream:
-        try:
+
+def init() -> list:
+    tests = []
+    files = glob.glob('*.yaml')
+    files.sort(key=os.path.getctime)
+    for file in files:
+        with open(file, "r") as stream:
             contents = yaml.safe_load(stream)
             tests.extend(list(map(lambda x: [f"{file:30s} | {x['name']}", x['input'], x['output']], contents)))
-        except yaml.YAMLError as exc:
-            print(exc, file=sys.stderr)
-            exit(1)
+    return tests
 
 
 class RunnerTests(unittest.TestCase):
+    tests = init()
 
     def setUp(self) -> None:
         self.parser = Parser()
