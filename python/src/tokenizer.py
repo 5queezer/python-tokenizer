@@ -27,6 +27,9 @@ class TokenType(Enum):
     TRUE = auto()
     FALSE = auto()
     NULL = auto()
+    WHILE = auto()
+    DO = auto()
+    FOR = auto()
     COMMA = auto()
 
     LSQB = auto()
@@ -74,6 +77,9 @@ spec: list[tuple[re.Pattern, TokenType or None]] = [
     (r'\btrue\b', TokenType.TRUE),
     (r'\bfalse\b', TokenType.FALSE),
     (r'\bnull\b', TokenType.NULL),
+    (r'\bwhile\b', TokenType.WHILE),
+    (r'\bdo\b', TokenType.DO),
+    (r'\bfor\b', TokenType.FOR),
 
     # ----------------------------
     # Numbers

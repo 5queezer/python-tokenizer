@@ -51,19 +51,76 @@ class Parser:
           | EmptyStatement
           | VariableStatement
           | IfStatement
+          | IterationStatement
           ;
         """
-        _type = self._lookahead.type
-        if _type == t.SEMI:
-            return self.empty_statement()
-        elif _type == t.LBRACE:
-            return self.block_statement()
-        elif _type == t.LET:
-            return self.variable_statement()
-        elif _type == t.IF:
-            return self.if_statement()
-        else:
-            return self.expression_statement()
+        match self._lookahead.type:
+            case t.SEMI:
+                return self.empty_statement()
+            case t.LBRACE:
+                return self.block_statement()
+            case t.LET:
+                return self.variable_statement()
+            case t.IF:
+                return self.if_statement()
+            case t.WHILE | t.DO | t.FOR:
+                return self.iteration_statement()
+            case _:
+                return self.expression_statement()
+
+    def iteration_statement(self):
+        """
+        IterationStatement
+          : WhileStatement
+          | DoWhileStatement
+          | ForStatement
+          ;
+        """
+        match self._lookahead.type:
+            case t.WHILE:
+                return self.while_statement()
+            case t.DO:
+                return self.do_while_statement()
+            case t.FOR:
+                return self.for_statement()
+
+    def while_statement(self) -> dict:
+        """
+        WhileStatement
+         : 'while' '(' Expression ')' Statement
+         ;
+        """
+        self._eat(t.WHILE)
+        self._eat(t.LPAR)
+        test = self.expression()
+        self._eat(t.RPAR)
+
+        body = self.statement()
+        return {
+            'type': 'WhileStatement',
+            'test': test,
+            'body': body
+        }
+
+    def do_while_statement(self) -> dict:
+        """
+        DoWhileStatement
+         : 'do' Statement 'while' '(' Expression ')' ';'
+         ;
+        """
+        self._eat(t.DO)
+        body = self.statement()
+        self._eat(t.WHILE)
+        self._eat(t.LPAR)
+        test = self.expression()
+        self._eat(t.RPAR)
+        self._eat(t.SEMI)
+
+        return {
+            'type': 'DoWhileStatement',
+            'test': test,
+            'body': body
+        }
 
     def if_statement(self):
         """
@@ -270,12 +327,13 @@ class Parser:
         """
         if self._is_literal(self._lookahead.type):
             return self.literal()
-        if self._lookahead.type == t.LPAR:
-            return self.paranthesized_expression()
-        elif self._lookahead.type == t.IDENTIFIER:
-            return self.identifier()
-        else:
-            return self.left_hand_side_expression()
+        match self._lookahead.type:
+            case t.LPAR:
+                return self.paranthesized_expression()
+            case t.IDENTIFIER:
+                return self.identifier()
+            case _:
+                return self.left_hand_side_expression()
 
     @staticmethod
     def _is_literal(token_type: t) -> bool:
@@ -426,17 +484,18 @@ class Parser:
           | NullLiteral
           ;
         """
-        _type = self._lookahead.type
-        if _type == t.NUMBER:
-            return self.numeric_literal()
-        elif _type == t.STRING:
-            return self.string_literal()
-        elif _type == t.TRUE:
-            return self.boolean_literal(True)
-        elif _type == t.FALSE:
-            return self.boolean_literal(False)
-        elif _type == t.NULL:
-            return self.null_literal()
+        match self._lookahead.type:
+            case t.NUMBER:
+                return self.numeric_literal()
+            case t.STRING:
+                return self.string_literal()
+            case t.TRUE:
+                return self.boolean_literal(True)
+            case t.FALSE:
+                return self.boolean_literal(False)
+            case t.NULL:
+                return self.null_literal()
+
         raise SyntaxError('Literal: unexpected literal production')
 
     def boolean_literal(self, value):
