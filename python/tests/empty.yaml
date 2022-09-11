@@ -1,5 +1,0 @@
-input: ;
-output:
-  type: Program
-  body:
-  - type: EmptyStatement
