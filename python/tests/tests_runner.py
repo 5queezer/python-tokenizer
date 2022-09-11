@@ -17,6 +17,7 @@ for file in glob.glob('*.yaml'):
             print(exc, file=sys.stderr)
             exit(1)
 
+
 class RunnerTests(unittest.TestCase):
 
     def setUp(self) -> None:
@@ -27,9 +28,10 @@ class RunnerTests(unittest.TestCase):
         print('❌', name, end='')
         try:
             output = self.parser.parse(inp)
-            self.assertEqual(output, expected, msg=f'Error in {name}')
+            self.assertEqual(expected, output, msg=f'Error in {name}')
             print('\r✅', name)
         except Exception as ex:
             print()
             raise ex
+
 

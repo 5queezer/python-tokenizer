@@ -263,7 +263,7 @@ class Parser:
           | LeftHandSideExpression AssignmentOperator AssignmentExpression
           ;
         """
-        left = self.additive_expression()
+        left = self.relational_expression()
         if not self._is_assignment_operator(self._lookahead.type):
             return left
         return {
@@ -322,10 +322,10 @@ class Parser:
        
         RelationalExpression
           : AdditiveExpression
-          | RelationalExpression RELATIONAL_OPERATOR AdditiveExpression
+          | AdditiveExpression RELATIONAL_OPERATOR RelationalExpression
           ;
         """
-        return self._binary_expression('AdditiveExpression', t.RELATIONAL_OPERATOR)
+        return self._binary_expression('additive_expression', t.RELATIONAL_OPERATOR)
 
     def literal(self) -> dict:
         """

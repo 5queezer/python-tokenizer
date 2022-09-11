@@ -80,7 +80,7 @@ spec: list[tuple[re.Pattern, TokenType or None]] = [
     (r'[\*\/\+\-]=', TokenType.COMPLEX_ASSIGN),
 
     # ----------------------------
-    # Relational Opertotors
+    # Relational Operators
     (r'[><]=?', TokenType.RELATIONAL_OPERATOR),
 
     # ----------------------------

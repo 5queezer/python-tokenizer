@@ -13,3 +13,39 @@
           right:
             type: NumericLiteral
             value: 0
+- name: greater than
+  input: x >= 2;
+  output:
+    type: Program
+    body:
+      - type: ExpressionStatement
+        expression:
+          type: BinaryExpression
+          operator: ">="
+          left:
+            type: Identifier
+            name: x
+          right:
+            type: NumericLiteral
+            value: 2
+- name: lower precedence than additive
+  input: x + 5 > 10;
+  output:
+    type: Program
+    body:
+      - type: ExpressionStatement
+        expression:
+          type: BinaryExpression
+          operator: '>'
+          left:
+            type: BinaryExpression
+            operator: +
+            left:
+              type: Identifier
+              name: x
+            right:
+              type: NumericLiteral
+              value: 5
+          right:
+            type: NumericLiteral
+            value: 10
