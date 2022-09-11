@@ -15,6 +15,7 @@ class TokenType(Enum):
     EQUALITY_OPERATOR = auto()
     AND = auto()
     OR = auto()
+    NOT = auto()
     SEMI = auto()
     LBRACE = auto()
     RBRACE = auto()
@@ -99,6 +100,7 @@ spec: list[tuple[re.Pattern, TokenType or None]] = [
     # Logical Operators: &&, ||
     (r'&&', TokenType.AND),
     (r'\|\|', TokenType.OR),
+    (r'!', TokenType.NOT),
 
     # ----------------------------
     # Math operators: +, -

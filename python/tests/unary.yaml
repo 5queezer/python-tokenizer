@@ -1,0 +1,54 @@
+- name: minus x (-x)
+  input: -x;
+  output:
+    type: Program
+    body:
+      - type: ExpressionStatement
+        expression:
+          type: UnaryExpression
+          operator: '-'
+          argument:
+            type: Identifier
+            name: x
+- name: not x (!x)
+  input: "!x;"
+  output:
+    type: Program
+    body:
+      - type: ExpressionStatement
+        expression:
+          type: UnaryExpression
+          operator: '!'
+          argument:
+            type: Identifier
+            name: x
+- name: decrement (--x)
+  input: "--x;"
+  output:
+    type: Program
+    body:
+      - type: ExpressionStatement
+        expression:
+          type: UnaryExpression
+          operator: '-'
+          argument:
+            type: UnaryExpression
+            operator: '-'
+            argument:
+              type: Identifier
+              name: x
+- name: minus not x (-!x)
+  input: "-!x;"
+  output:
+    type: Program
+    body:
+      - type: ExpressionStatement
+        expression:
+          type: UnaryExpression
+          operator: '-'
+          argument:
+            type: UnaryExpression
+            operator: '!'
+            argument:
+              type: Identifier
+              name: x

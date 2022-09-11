@@ -192,12 +192,12 @@ class Parser:
     def multiplicative_expression(self) -> dict:
         """
         MultiplicativeExpression
-          : PrimaryExpression
-          | MultiplicativeExpression MULTIPLICATIVE_OPERATOR PrimaryExpression -> PrimaryExpression MULTIPLICATIVE_OPERATOR
+          : UnaryExpression
+          | MultiplicativeExpression MULTIPLICATIVE_OPERATOR UnaryExpression
           ;
         """
         return self._binary_expression(
-            'primary_expression',
+            'unary_expression',
             t.MULTIPLICATIVE_OPERATOR
         )
 
@@ -237,19 +237,45 @@ class Parser:
             }
         return left
 
+
+    def unary_expression(self) -> dict:
+        """
+        UnaryExpression
+            : LeftHandSideExpression
+            | ADDITIVE_OPERATOR UnaryExpression
+            | LOGICAL_NOT UnaryExpression
+            ;
+        """
+        operator = None
+        if self._lookahead.type == t.ADDITIVE_OPERATOR:
+            operator = self._eat(t.ADDITIVE_OPERATOR).value
+        elif self._lookahead.type == t.NOT:
+            operator = self._eat(t.NOT).value
+        if operator is not None:
+            return {
+                'type': 'UnaryExpression',
+                'operator': operator,
+                'argument': self.unary_expression() # --x
+            }
+        return self.left_hand_side_expression()
+
+
     def primary_expression(self) -> dict:
         """
         PrimaryExpression
           : Literal
           | ParanthesizedExpression
-          | LeftHandSideExpression
+          | Identifier
           ;
         """
         if self._is_literal(self._lookahead.type):
             return self.literal()
         if self._lookahead.type == t.LPAR:
             return self.paranthesized_expression()
-        return self.left_hand_side_expression()
+        elif self._lookahead.type == t.IDENTIFIER:
+            return self.identifier()
+        else:
+            return self.left_hand_side_expression()
 
     @staticmethod
     def _is_literal(token_type: t) -> bool:
@@ -297,7 +323,7 @@ class Parser:
           : Identifier
           ;
         """
-        return self.identifier()
+        return self.primary_expression()
 
     def identifier(self):
         """
