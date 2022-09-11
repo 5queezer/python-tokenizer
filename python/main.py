@@ -5,7 +5,7 @@ from src.parser import Parser
 if __name__ == '__main__':
     parser = Parser()
     input = '''
-    if (x) if (y) {} else {}
+    x + 5 > 10;
     '''
     output = parser.parse(input)
     test = {

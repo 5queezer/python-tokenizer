@@ -1,3 +1,4 @@
+import sys
 import unittest
 import yaml
 import glob
@@ -11,10 +12,10 @@ for file in glob.glob('*.yaml'):
     with open(file, "r") as stream:
         try:
             contents = yaml.safe_load(stream)
-            tests.extend(list(map(lambda x: [x['name'], x['input'], x['output']], contents)))
+            tests.extend(list(map(lambda x: [f"{file:30s} | {x['name']}", x['input'], x['output']], contents)))
         except yaml.YAMLError as exc:
-            print(exc)
-
+            print(exc, file=sys.stderr)
+            exit(1)
 
 class RunnerTests(unittest.TestCase):
 
@@ -23,5 +24,12 @@ class RunnerTests(unittest.TestCase):
 
     @parameterized.expand(tests)
     def test_run(self, name, inp, expected):
-        output = self.parser.parse(inp)
-        self.assertEqual(output, expected, msg=f'Error in {name}')
+        print('❌', name, end='')
+        try:
+            output = self.parser.parse(inp)
+            self.assertEqual(output, expected, msg=f'Error in {name}')
+            print('\r✅', name)
+        except Exception as ex:
+            print()
+            raise ex
+

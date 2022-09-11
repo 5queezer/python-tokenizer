@@ -61,11 +61,11 @@ class Parser:
         elif _type == t.LET:
             return self.variable_statement()
         elif _type == t.IF:
-            return self.if_statememnt()
+            return self.if_statement()
         else:
             return self.expression_statement()
 
-    def if_statememnt(self):
+    def if_statement(self):
         """
         IfStatement
           : 'if' '(' Expression ')' Statement
@@ -310,6 +310,22 @@ class Parser:
         if self._lookahead.type == t.SIMPLE_ASSIGN:
             return self._eat(t.SIMPLE_ASSIGN)
         return self._eat(t.COMPLEX_ASSIGN)
+
+    def relational_expression(self):
+        """
+        RELATIONAL_OPERATOR: >, >=, <, <=
+       
+          x > y
+          x >= y
+          x < y
+          x <= y
+       
+        RelationalExpression
+          : AdditiveExpression
+          | RelationalExpression RELATIONAL_OPERATOR AdditiveExpression
+          ;
+        """
+        return self._binary_expression('AdditiveExpression', t.RELATIONAL_OPERATOR)
 
     def literal(self) -> dict:
         """

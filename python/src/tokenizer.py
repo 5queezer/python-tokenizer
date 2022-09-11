@@ -1,6 +1,7 @@
 import re
 from typing import NamedTuple
 from enum import Enum, auto
+import token
 
 
 class TokenType(Enum):
@@ -11,6 +12,7 @@ class TokenType(Enum):
     COMPLEX_ASSIGN = auto()
     ADDITIVE_OPERATOR = auto()
     MULTIPLICATIVE_OPERATOR = auto()
+    RELATIONAL_OPERATOR = auto()
     SEMI = auto()
     LBRACE = auto()
     RBRACE = auto()
@@ -76,6 +78,10 @@ spec: list[tuple[re.Pattern, TokenType or None]] = [
     # Assignment operators =, *=, /=, +=, -=
     (r'=', TokenType.SIMPLE_ASSIGN),
     (r'[\*\/\+\-]=', TokenType.COMPLEX_ASSIGN),
+
+    # ----------------------------
+    # Relational Opertotors
+    (r'[><]=?', TokenType.RELATIONAL_OPERATOR),
 
     # ----------------------------
     # Math operators: +, -
