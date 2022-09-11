@@ -1,0 +1,53 @@
+- name: simple function
+  input: foo(x);
+  output:
+    type: Program
+    body:
+      - type: ExpressionStatement
+        expression:
+          type: CallExpression
+          callee:
+            type: Identifier
+            name: foo
+          arguments:
+            - type: Identifier
+              name: x
+- name: call from function result
+  input: foo(x)();
+  output:
+    type: Program
+    body:
+      - type: ExpressionStatement
+        expression:
+          type: CallExpression
+          callee:
+            type: CallExpression
+            callee:
+              type: Identifier
+              name: foo
+            arguments:
+              - type: Identifier
+                name: x
+          arguments: [ ]
+- name: member functions
+  input: console.log(x, y);
+  output:
+    type: Program
+    body:
+      - type: ExpressionStatement
+        expression:
+          type: CallExpression
+          callee:
+            type: MemberExpression
+            computed: false
+            object:
+              type: Identifier
+              name: console
+            property:
+              type: Identifier
+              name: log
+          arguments:
+            - type: Identifier
+              name: x
+            - type: Identifier
+              name: 'y'

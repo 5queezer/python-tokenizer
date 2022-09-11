@@ -483,10 +483,72 @@ class Parser:
     def left_hand_side_expression(self):
         """
         LeftHandSideExpression
-          : MemberExpression
+          : CallMemberExpression
           ;
         """
-        return self.member_expression()
+        return self.call_member_expression()
+
+    def call_member_expression(self):
+        """
+        CallMemberExpression
+          : MemberExpression
+          | CallExpression
+          ;
+        """
+        member = self.member_expression()
+
+        if self._lookahead.type == t.LPAR:
+            return self._call_expression(member)
+        return member
+
+    def _call_expression(self, callee):
+        """
+        Generic call expression helper.
+
+        CallExpression
+          : Callee Arguments
+          ;
+
+        Callee
+          : MemberExpression
+          | Super
+          | CallExpression
+          ;
+        """
+        call_expression = {
+            'type': 'CallExpression',
+            'callee': callee,
+            'arguments': self.arguments()
+        }
+
+        if self._lookahead.type == t.LPAR:
+            call_expression = self._call_expression(call_expression)
+
+        return call_expression
+    
+    def arguments(self):
+        """
+        Arguments
+          : '(' OptArgumentList ')'
+          ;
+        """
+        self._eat(t.LPAR)
+        argument_list = self.argument_list() if self._lookahead.type != t.RPAR else []
+        self._eat(t.RPAR)
+        return argument_list
+
+    def argument_list(self) -> list:
+        """
+        ArgumentList
+          : AssignmentExpression
+          | ArgumentList ',' AssignmentExpression
+          ;
+        """
+        argument_list = [self.assignment_expression()]
+        while self._lookahead.type == t.COMMA and self._eat(t.COMMA):
+            argument_list.append(self.assignment_expression())
+
+        return argument_list
 
     def member_expression(self):
         """
