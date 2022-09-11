@@ -48,17 +48,44 @@ class Parser:
           : ExpressionStatement
           | BlockStatement
           | EmptyStatement
+          | VariableStatement
+          | IfStatement
           ;
         """
-        type = self._lookahead.type
-        if type == t.SEMICOLON:
+        _type = self._lookahead.type
+        if _type == t.SEMICOLON:
             return self.empty_statement()
-        elif type == t.OPEN_SQBRACKET:
+        elif _type == t.OPEN_CURLY_BRACE:
             return self.block_statement()
-        elif type == t.LET:
+        elif _type == t.LET:
             return self.variable_statement()
+        elif _type == t.IF:
+            return self.if_statememnt()
         else:
             return self.expression_statement()
+
+    def if_statememnt(self):
+        """
+        IfStatement
+          : 'if' '(' Expression ')' Statement
+          | 'if' '(' Expression ')' Statement 'else' Statement
+          ;
+        """
+        self._eat(t.IF)
+        self._eat(t.OPEN_BRACE)
+        test = self.expression()
+        self._eat(t.CLOSE_BRACE)
+        consequent = self.statement()
+
+        alternate = self._eat(t.ELSE) and self.statement() \
+            if self._lookahead is not None and self._lookahead.type == t.ELSE \
+            else None
+        return {
+            'type': 'IfStatement',
+            'test': test,
+            'consequent': consequent,
+            'alternate': alternate
+        }
 
     def variable_statement(self) -> dict:
         """
@@ -125,11 +152,11 @@ class Parser:
     def block_statement(self) -> dict:
         """
         BlockStatement
-          : '{' OptStatementList t.CLOSE_SQBRACKET
+          : '{' OptStatementList '}'
         """
-        self._eat(t.OPEN_SQBRACKET)
-        body = self.statement_list(t.CLOSE_SQBRACKET) if self._lookahead.type != t.CLOSE_SQBRACKET else []
-        self._eat(t.CLOSE_SQBRACKET)
+        self._eat(t.OPEN_CURLY_BRACE)
+        body = self.statement_list(t.CLOSE_CURLY_BRACE) if self._lookahead.type != t.CLOSE_CURLY_BRACE else []
+        self._eat(t.CLOSE_CURLY_BRACE)
         return {
             'type': 'BlockStatement',
             'body': body
@@ -201,22 +228,23 @@ class Parser:
         """
         if self._is_literal(self._lookahead.type):
             return self.literal()
-        if self._lookahead.type == t.OPEN_BRACKET:
+        if self._lookahead.type == t.OPEN_BRACE:
             return self.paranthesized_expression()
         return self.left_hand_side_expression()
 
-    def _is_literal(self, token_type: t) -> bool:
+    @staticmethod
+    def _is_literal(token_type: t) -> bool:
         return token_type in [t.NUMBER, t.STRING]
 
     def paranthesized_expression(self) -> dict:
         """
         ParanthesizedExpression
-          : t.OPEN_BRACKET Expression ')'
+          : t.OPEN_BRACE Expression ')'
           ;
         """
-        self._eat(t.OPEN_BRACKET)
+        self._eat(t.OPEN_BRACE)
         expression = self.expression()
-        self._eat(t.CLOSE_BRACKET)
+        self._eat(t.CLOSE_BRACE)
         return expression
 
     def expression(self) -> dict:

@@ -12,11 +12,13 @@ class TokenType(Enum):
     ADDITIVE_OPERATOR = auto()
     MULTIPLICATIVE_OPERATOR = auto()
     SEMICOLON = auto()
-    OPEN_SQBRACKET = auto()
-    CLOSE_SQBRACKET = auto()
-    OPEN_BRACKET = auto()
-    CLOSE_BRACKET = auto()
+    OPEN_CURLY_BRACE = auto()
+    CLOSE_CURLY_BRACE = auto()
+    OPEN_BRACE = auto()
+    CLOSE_BRACE = auto()
     LET = auto()
+    IF = auto()
+    ELSE = auto()
     COMMA = auto()
 
 
@@ -47,15 +49,17 @@ spec: list[tuple[re.Pattern, TokenType or None]] = [
     # ----------------------------
     # Symbols, delimiters
     (r';', TokenType.SEMICOLON),
-    (r'\{', TokenType.OPEN_SQBRACKET),
-    (r'\}', TokenType.CLOSE_SQBRACKET),
-    (r'\(', TokenType.OPEN_BRACKET),
-    (r'\)', TokenType.CLOSE_BRACKET),
+    (r'\{', TokenType.OPEN_CURLY_BRACE),
+    (r'\}', TokenType.CLOSE_CURLY_BRACE),
+    (r'\(', TokenType.OPEN_BRACE),
+    (r'\)', TokenType.CLOSE_BRACE),
     (r',', TokenType.COMMA),
 
     # ----------------------------
     # Keywords
     (r'\blet\b', TokenType.LET),
+    (r'\bif\b', TokenType.IF),
+    (r'\belse\b', TokenType.ELSE),
 
     # ----------------------------
     # Numbers

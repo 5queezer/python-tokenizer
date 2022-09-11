@@ -4,8 +4,14 @@ from src.parser import Parser
 
 if __name__ == '__main__':
     parser = Parser()
-    out = parser.parse('''
-    let x, y;
-    ''')
-    print(yaml.dump(out['body'], sort_keys=False))
+    input = '''
+    if (x) if (y) {} else {}
+    '''
+    output = parser.parse(input)
+    test = {
+        'input': input,
+        'output': output
+    }
+    print(yaml.dump(test, sort_keys=False))
+    # print(json.dumps(test, indent=2))
 
