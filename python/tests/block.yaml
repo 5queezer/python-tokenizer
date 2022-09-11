@@ -1,0 +1,51 @@
+- name: block
+  input: |-
+    {
+        42;
+        'hello';
+    }
+  output:
+    type: Program
+    body:
+    - type: BlockStatement
+      body:
+      - type: ExpressionStatement
+        expression:
+          type: NumericLiteral
+          value: 42
+      - type: ExpressionStatement
+        expression:
+          type: StringLiteral
+          value: hello
+- name: empty block
+  input: |-
+    {
+    }
+  output:
+    type: Program
+    body:
+    - type: BlockStatement
+      body: []
+- name: nested block
+  input: |-
+    {
+        42;
+        {
+            'hello';
+        }
+    }
+  output:
+    type: Program
+    body:
+    - type: BlockStatement
+      body:
+      - type: ExpressionStatement
+        expression:
+          type: NumericLiteral
+          value: 42
+      - type: BlockStatement
+        body:
+        - type: ExpressionStatement
+          expression:
+            type: StringLiteral
+            value: hello

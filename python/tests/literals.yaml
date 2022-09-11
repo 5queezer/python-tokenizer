@@ -1,0 +1,60 @@
+- name: number
+  input: 42;
+  output:
+    type: Program
+    body:
+    - type: ExpressionStatement
+      expression:
+        type: NumericLiteral
+        value: 42
+- name: string double quote
+  input: '"hello";'
+  output:
+    type: Program
+    body:
+    - type: ExpressionStatement
+      expression:
+        type: StringLiteral
+        value: hello
+- name: string single quote
+  input: '''hello'';'
+  output:
+    type: Program
+    body:
+    - type: ExpressionStatement
+      expression:
+        type: StringLiteral
+        value: hello
+- name: whitespace
+  input: '   42; '
+  output:
+    type: Program
+    body:
+    - type: ExpressionStatement
+      expression:
+        type: NumericLiteral
+        value: 42
+- name: single line comment
+  input: |-
+    // Number: 42
+    42;
+  output:
+    type: Program
+    body:
+    - type: ExpressionStatement
+      expression:
+        type: NumericLiteral
+        value: 42
+- name: multi line comment
+  input: |-
+    /**
+     * Documentation comment:
+     */
+    "hello";
+  output:
+    type: Program
+    body:
+    - type: ExpressionStatement
+      expression:
+        type: StringLiteral
+        value: hello

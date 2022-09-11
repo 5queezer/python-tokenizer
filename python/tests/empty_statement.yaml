@@ -1,0 +1,6 @@
+- name: emtpy statement
+  input: ;
+  output:
+    type: Program
+    body:
+    - type: EmptyStatement
