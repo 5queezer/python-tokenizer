@@ -13,6 +13,8 @@ class TokenType(Enum):
     MULTIPLICATIVE_OPERATOR = auto()
     RELATIONAL_OPERATOR = auto()
     EQUALITY_OPERATOR = auto()
+    AND = auto()
+    OR = auto()
     SEMI = auto()
     LBRACE = auto()
     RBRACE = auto()
@@ -92,6 +94,11 @@ spec: list[tuple[re.Pattern, TokenType or None]] = [
     # ----------------------------
     # Relational Operators
     (r'[><]=?', TokenType.RELATIONAL_OPERATOR),
+
+    # ----------------------------
+    # Logical Operators: &&, ||
+    (r'&&', TokenType.AND),
+    (r'\|\|', TokenType.OR),
 
     # ----------------------------
     # Math operators: +, -

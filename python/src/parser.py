@@ -201,6 +201,24 @@ class Parser:
             t.MULTIPLICATIVE_OPERATOR
         )
 
+    def _logical_expression(self, builder_name, operator_token: t) -> dict:
+        """
+        Generic helper for LogicalExpression nodes
+        """
+        left = getattr(self, builder_name)()
+
+        # operator: +, -
+        while self._lookahead.type == operator_token:
+            operator = self._eat(operator_token).value
+            right = getattr(self, builder_name)()
+            left = {
+                'type': 'LogicalExpression',
+                'operator': operator,
+                'left': left,
+                'right': right
+            }
+        return left
+
     def _binary_expression(self, builder_name, operator_token: t) -> dict:
         """
         Generic binary expression
@@ -259,11 +277,11 @@ class Parser:
     def assignment_expression(self) -> dict:
         """
         AssignmentExpression
-          : EqualityExpression
+          : LogicalORExpression
           | LeftHandSideExpression AssignmentOperator AssignmentExpression
           ;
         """
-        left = self.equality_expression()
+        left = self.logical_OR_expression()
         if not self._is_assignment_operator(self._lookahead.type):
             return left
         return {
@@ -317,6 +335,32 @@ class Parser:
             return self._eat(t.SIMPLE_ASSIGN)
         return self._eat(t.COMPLEX_ASSIGN)
 
+    def logical_OR_expression(self):
+        """
+        Logical OR expression.
+        
+        x || y
+        
+        LogicalORExpression
+          : LogicalANDExpression OR LogicalORExpression
+          | LogicalORExpression
+          ;
+        """
+        return self._logical_expression('logical_AND_expression', t.OR)
+
+    def logical_AND_expression(self):
+        """
+        Logical AND expression.
+
+        x && y
+
+        LogicalANDExpression
+          : EqualityExpression AND LogicalANDExpression
+          | LogicalANDExpression
+          ;
+        """
+        return self._logical_expression('equality_expression', t.AND)
+    
     def equality_expression(self):
         """
         EQUALITY_OPERATOR: ==, !=
