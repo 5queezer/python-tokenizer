@@ -14,7 +14,7 @@ def init() -> list:
     for file in files:
         with open(file, "r") as stream:
             contents = yaml.safe_load(stream)
-            tests.extend(list(map(lambda x: [f"{file:25s} | {x['name']}", x['input'], x['output']], contents)))
+            tests.extend(list(map(lambda x: [f"{file:50s}︎︎ {x['name']}", x['input'], x['output']], contents)))
     return tests
 
 
