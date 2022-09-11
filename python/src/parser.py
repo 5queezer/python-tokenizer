@@ -235,7 +235,7 @@ class Parser:
 
     @staticmethod
     def _is_literal(token_type: t) -> bool:
-        return token_type in [t.NUMBER, t.STRING]
+        return token_type in [t.NUMBER, t.STRING, t.TRUE, t.FALSE, t.NULL]
 
     def paranthesized_expression(self) -> dict:
         """
@@ -259,11 +259,11 @@ class Parser:
     def assignment_expression(self) -> dict:
         """
         AssignmentExpression
-          : AdditiveExpression
+          : EqualityExpression
           | LeftHandSideExpression AssignmentOperator AssignmentExpression
           ;
         """
-        left = self.relational_expression()
+        left = self.equality_expression()
         if not self._is_assignment_operator(self._lookahead.type):
             return left
         return {
@@ -307,9 +307,29 @@ class Parser:
         return token_type in [t.SIMPLE_ASSIGN, t.COMPLEX_ASSIGN]
 
     def assignment_operator(self) -> Token:
+        """
+        AssignmentOperator
+          : SIMPLE_ASSIGN
+          | COMPLEX_ASSIGN
+          ;
+        """
         if self._lookahead.type == t.SIMPLE_ASSIGN:
             return self._eat(t.SIMPLE_ASSIGN)
         return self._eat(t.COMPLEX_ASSIGN)
+
+    def equality_expression(self):
+        """
+        EQUALITY_OPERATOR: ==, !=
+
+          x == y
+          x != y
+
+        EqualityExpression
+          : RelationalExpression
+          | EqualityExpression EQUALITY_OPERATOR RelationalExpression
+          ;
+        """
+        return self._binary_expression('relational_expression', t.EQUALITY_OPERATOR)
 
     def relational_expression(self):
         """
@@ -332,14 +352,47 @@ class Parser:
         Literal
           : NumericLiteral
           | StringLiteral
+          | BooleanLiteral
+          | NullLiteral
           ;
         """
-        # lookahead = self._lookahead()
-        if self._lookahead.type == t.NUMBER:
+        _type = self._lookahead.type
+        if _type == t.NUMBER:
             return self.numeric_literal()
-        elif self._lookahead.type == t.STRING:
+        elif _type == t.STRING:
             return self.string_literal()
+        elif _type == t.TRUE:
+            return self.boolean_literal(True)
+        elif _type == t.FALSE:
+            return self.boolean_literal(False)
+        elif _type == t.NULL:
+            return self.null_literal()
         raise SyntaxError('Literal: unexpected literal production')
+
+    def boolean_literal(self, value):
+        """
+        BooleanLiteral
+          : 'true'
+          | 'false'
+          ;
+        """
+        self._eat(t.TRUE if value else t.FALSE)
+        return {
+          'type': 'BooleanLiteral',
+          'value': value
+        }
+
+    def null_literal(self):
+        """
+        NullLiteral
+          : 'null'
+          ;
+        """
+        self._eat(t.NULL)
+        return {
+          'type': 'NullLiteral',
+          'value': None
+        }
 
     def string_literal(self) -> dict:
         """
