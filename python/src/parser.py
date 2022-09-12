@@ -1,4 +1,4 @@
-from src.tokenizer import Tokenizer, TokenType as t, Token
+from src.tokenizer import Tokenizer, TokenType as T, Token
 
 
 class Parser:
@@ -57,21 +57,21 @@ class Parser:
           ;
         """
         match self._lookahead.type:
-            case t.SEMI:
+            case T.SEMI:
                 return self.empty_statement()
-            case t.LBRACE:
+            case T.LBRACE:
                 return self.block_statement()
-            case t.LET:
+            case T.LET:
                 return self.variable_statement()
-            case t.DEF:
+            case T.DEF:
                 return self.function_declaration()
-            case t.CLASS:
+            case T.CLASS:
                 return self.class_declaration()
-            case t.RETURN:
+            case T.RETURN:
                 return self.return_statement()
-            case t.IF:
+            case T.IF:
                 return self.if_statement()
-            case t.WHILE | t.DO | t.FOR:
+            case T.WHILE | T.DO | T.FOR:
                 return self.iteration_statement()
             case _:
                 return self.expression_statement()
@@ -82,9 +82,9 @@ class Parser:
           : 'class' Identifier OptClassExtends BlockStatement
           ;
         """
-        self._eat(t.CLASS)
+        self._eat(T.CLASS)
         id = self.identifier()
-        super_class = self.class_extends() if self._lookahead.type == t.EXTENDS else None
+        super_class = self.class_extends() if self._lookahead.type == T.EXTENDS else None
         body = self.block_statement()
         return {
             'type': 'ClassDeclaration',
@@ -99,7 +99,7 @@ class Parser:
           : 'extends' Identifier
           ;
         """
-        self._eat(t.EXTENDS)
+        self._eat(T.EXTENDS)
         return self.identifier()
 
     def function_declaration(self):
@@ -108,11 +108,11 @@ class Parser:
           : 'def' Identifier '(' OptFormalParameterList ')' BlockStatement
           ;
         """
-        self._eat(t.DEF)
+        self._eat(T.DEF)
         name = self.identifier()
-        self._eat(t.LPAR)
-        params = self.formal_parameter_list() if self._lookahead.type != t.RPAR else []
-        self._eat(t.RPAR)
+        self._eat(T.LPAR)
+        params = self.formal_parameter_list() if self._lookahead.type != T.RPAR else []
+        self._eat(T.RPAR)
         body = self.block_statement()
         return {
             'type': 'FunctionDeclaration',
@@ -132,9 +132,9 @@ class Parser:
 
         while True:
             params.append(self.identifier())
-            if self._lookahead.type != t.COMMA:
+            if self._lookahead.type != T.COMMA:
                 break
-            self._eat(t.COMMA)
+            self._eat(T.COMMA)
 
         return params
 
@@ -144,9 +144,9 @@ class Parser:
           : 'return' OptExpression ';'
           ;
         """
-        self._eat(t.RETURN)
-        argument = self.expression() if self._lookahead.type != t.SEMI else None
-        self._eat(t.SEMI)
+        self._eat(T.RETURN)
+        argument = self.expression() if self._lookahead.type != T.SEMI else None
+        self._eat(T.SEMI)
         return {
             'type': 'ReturnStatement',
             'argument': argument
@@ -161,11 +161,11 @@ class Parser:
           ;
         """
         match self._lookahead.type:
-            case t.WHILE:
+            case T.WHILE:
                 return self.while_statement()
-            case t.DO:
+            case T.DO:
                 return self.do_while_statement()
-            case t.FOR:
+            case T.FOR:
                 return self.for_statement()
 
     def while_statement(self) -> dict:
@@ -174,10 +174,10 @@ class Parser:
          : 'while' '(' Expression ')' Statement
          ;
         """
-        self._eat(t.WHILE)
-        self._eat(t.LPAR)
+        self._eat(T.WHILE)
+        self._eat(T.LPAR)
         test = self.expression()
-        self._eat(t.RPAR)
+        self._eat(T.RPAR)
 
         body = self.statement()
         return {
@@ -192,13 +192,13 @@ class Parser:
          : 'do' Statement 'while' '(' Expression ')' ';'
          ;
         """
-        self._eat(t.DO)
+        self._eat(T.DO)
         body = self.statement()
-        self._eat(t.WHILE)
-        self._eat(t.LPAR)
+        self._eat(T.WHILE)
+        self._eat(T.LPAR)
         test = self.expression()
-        self._eat(t.RPAR)
-        self._eat(t.SEMI)
+        self._eat(T.RPAR)
+        self._eat(T.SEMI)
 
         return {
             'type': 'DoWhileStatement',
@@ -212,17 +212,17 @@ class Parser:
           : 'for' '(' OptForStatementInit ';' OptExpression ';' OptExpression ')' Statement
           ;
         """
-        self._eat(t.FOR)
-        self._eat(t.LPAR)
+        self._eat(T.FOR)
+        self._eat(T.LPAR)
 
-        init = self.for_statement_init() if self._lookahead.type != t.SEMI else None
-        self._eat(t.SEMI)
+        init = self.for_statement_init() if self._lookahead.type != T.SEMI else None
+        self._eat(T.SEMI)
 
-        test = self.expression() if self._lookahead.type != t.SEMI else None
-        self._eat(t.SEMI)
+        test = self.expression() if self._lookahead.type != T.SEMI else None
+        self._eat(T.SEMI)
 
-        update = self.expression() if self._lookahead.type != t.RPAR else None
-        self._eat(t.RPAR)
+        update = self.expression() if self._lookahead.type != T.RPAR else None
+        self._eat(T.RPAR)
 
         body = self.statement()
 
@@ -241,7 +241,7 @@ class Parser:
           | Expression
           ;
         """
-        if self._lookahead.type == t.LET:
+        if self._lookahead.type == T.LET:
             return self.variable_statement_init()
         return self.expression()
 
@@ -252,14 +252,14 @@ class Parser:
           | 'if' '(' Expression ')' Statement 'else' Statement
           ;
         """
-        self._eat(t.IF)
-        self._eat(t.LPAR)
+        self._eat(T.IF)
+        self._eat(T.LPAR)
         test = self.expression()
-        self._eat(t.RPAR)
+        self._eat(T.RPAR)
         consequent = self.statement()
 
-        alternate = self._eat(t.ELSE) and self.statement() \
-            if self._lookahead is not None and self._lookahead.type == t.ELSE \
+        alternate = self._eat(T.ELSE) and self.statement() \
+            if self._lookahead is not None and self._lookahead.type == T.ELSE \
             else None
         return {
             'type': 'IfStatement',
@@ -274,7 +274,7 @@ class Parser:
           : 'let' VariableDeclarationList
           ;
         """
-        self._eat(t.LET)
+        self._eat(T.LET)
         declarations = self.variable_declaration_list()
         return {
             'type': 'VariableStatement',
@@ -288,7 +288,7 @@ class Parser:
           ;
         """
         variable_statement = self.variable_statement_init()
-        self._eat(t.SEMI)
+        self._eat(T.SEMI)
         return variable_statement
 
     def variable_declaration_list(self):
@@ -301,8 +301,8 @@ class Parser:
         declarations = []
         while True:
             declarations.append(self.variable_declaration())
-            if self._lookahead.type == t.COMMA:
-                self._eat(t.COMMA)
+            if self._lookahead.type == T.COMMA:
+                self._eat(T.COMMA)
             else:
                 break
         return declarations
@@ -314,7 +314,7 @@ class Parser:
           ;
         """
         _id = self.identifier()
-        if self._lookahead.type != t.SEMI and self._lookahead.type != t.COMMA:
+        if self._lookahead.type != T.SEMI and self._lookahead.type != T.COMMA:
             init = self.variable_initializer()
         else:
             init = None
@@ -330,11 +330,11 @@ class Parser:
           : SIMPLE_ASSIGN AssignmentExpression
           ;
         """
-        self._eat(t.SIMPLE_ASSIGN)
+        self._eat(T.SIMPLE_ASSIGN)
         return self.assignment_expression()
 
     def empty_statement(self) -> dict:
-        self._eat(t.SEMI)
+        self._eat(T.SEMI)
         return {
             'type': 'EmptyStatement'
         }
@@ -344,9 +344,9 @@ class Parser:
         BlockStatement
           : '{' OptStatementList '}'
         """
-        self._eat(t.LBRACE)
-        body = self.statement_list(t.RBRACE) if self._lookahead.type != t.RBRACE else []
-        self._eat(t.RBRACE)
+        self._eat(T.LBRACE)
+        body = self.statement_list(T.RBRACE) if self._lookahead.type != T.RBRACE else []
+        self._eat(T.RBRACE)
         return {
             'type': 'BlockStatement',
             'body': body
@@ -359,7 +359,7 @@ class Parser:
           ;
         """
         expression = self.expression()
-        self._eat(t.SEMI)
+        self._eat(T.SEMI)
         return {
             'type': 'ExpressionStatement',
             'expression': expression
@@ -375,7 +375,7 @@ class Parser:
         """
         return self._binary_expression(
             'multiplicative_expression',
-            t.ADDITIVE_OPERATOR
+            T.ADDITIVE_OPERATOR
         )
 
     def multiplicative_expression(self) -> dict:
@@ -387,10 +387,10 @@ class Parser:
         """
         return self._binary_expression(
             'unary_expression',
-            t.MULTIPLICATIVE_OPERATOR
+            T.MULTIPLICATIVE_OPERATOR
         )
 
-    def _logical_expression(self, builder_name, operator_token: t) -> dict:
+    def _logical_expression(self, builder_name, operator_token: T) -> dict:
         """
         Generic helper for LogicalExpression nodes
         """
@@ -408,7 +408,7 @@ class Parser:
             }
         return left
 
-    def _binary_expression(self, builder_name, operator_token: t) -> dict:
+    def _binary_expression(self, builder_name, operator_token: T) -> dict:
         """
         Generic binary expression
         """
@@ -435,10 +435,10 @@ class Parser:
             ;
         """
         operator = None
-        if self._lookahead.type == t.ADDITIVE_OPERATOR:
-            operator = self._eat(t.ADDITIVE_OPERATOR).value
-        elif self._lookahead.type == t.NOT:
-            operator = self._eat(t.NOT).value
+        if self._lookahead.type == T.ADDITIVE_OPERATOR:
+            operator = self._eat(T.ADDITIVE_OPERATOR).value
+        elif self._lookahead.type == T.NOT:
+            operator = self._eat(T.NOT).value
         if operator is not None:
             return {
                 'type': 'UnaryExpression',
@@ -460,13 +460,13 @@ class Parser:
         if self._is_literal(self._lookahead.type):
             return self.literal()
         match self._lookahead.type:
-            case t.LPAR:
+            case T.LPAR:
                 return self.paranthesized_expression()
-            case t.IDENTIFIER:
+            case T.IDENTIFIER:
                 return self.identifier()
-            case t.THIS:
+            case T.THIS:
                 return self.this_expression()
-            case t.NEW:
+            case T.NEW:
                 return self.new_expression()
             case _:
                 return self.left_hand_side_expression()
@@ -477,7 +477,7 @@ class Parser:
           : 'new' MemberExpression Arguments
           ;
         """
-        self._eat(t.NEW)
+        self._eat(T.NEW)
         return {
             'type': 'NewExpression',
             'callee': self.member_expression(),
@@ -490,7 +490,7 @@ class Parser:
           : 'this'
           ;
         """
-        self._eat(t.THIS)
+        self._eat(T.THIS)
         return {
             'type': 'ThisExpression'
         }
@@ -501,24 +501,24 @@ class Parser:
           : 'super'
           ;
         """
-        self._eat(t.SUPER)
+        self._eat(T.SUPER)
         return {
             'type': 'Super'
         }
 
     @staticmethod
-    def _is_literal(token_type: t) -> bool:
-        return token_type in [t.NUMBER, t.STRING, t.TRUE, t.FALSE, t.NULL]
+    def _is_literal(token_type: T) -> bool:
+        return token_type in [T.NUMBER, T.STRING, T.TRUE, T.FALSE, T.NULL]
 
     def paranthesized_expression(self) -> dict:
         """
         ParanthesizedExpression
-          : t.LPAR Expression ')'
+          : T.LPAR Expression ')'
           ;
         """
-        self._eat(t.LPAR)
+        self._eat(T.LPAR)
         expression = self.expression()
-        self._eat(t.RPAR)
+        self._eat(T.RPAR)
         return expression
 
     def expression(self) -> dict:
@@ -561,12 +561,12 @@ class Parser:
           | CallExpression
           ;
         """
-        if self._lookahead.type == t.SUPER:
+        if self._lookahead.type == T.SUPER:
             return self._call_expression(self.super())
 
         member = self.member_expression()
 
-        if self._lookahead.type == t.LPAR:
+        if self._lookahead.type == T.LPAR:
             return self._call_expression(member)
         return member
 
@@ -590,7 +590,7 @@ class Parser:
             'arguments': self.arguments()
         }
 
-        if self._lookahead.type == t.LPAR:
+        if self._lookahead.type == T.LPAR:
             call_expression = self._call_expression(call_expression)
 
         return call_expression
@@ -601,9 +601,9 @@ class Parser:
           : '(' OptArgumentList ')'
           ;
         """
-        self._eat(t.LPAR)
-        argument_list = self.argument_list() if self._lookahead.type != t.RPAR else []
-        self._eat(t.RPAR)
+        self._eat(T.LPAR)
+        argument_list = self.argument_list() if self._lookahead.type != T.RPAR else []
+        self._eat(T.RPAR)
         return argument_list
 
     def argument_list(self) -> list:
@@ -614,7 +614,7 @@ class Parser:
           ;
         """
         argument_list = [self.assignment_expression()]
-        while self._lookahead.type == t.COMMA and self._eat(t.COMMA):
+        while self._lookahead.type == T.COMMA and self._eat(T.COMMA):
             argument_list.append(self.assignment_expression())
 
         return argument_list
@@ -629,10 +629,9 @@ class Parser:
         """
 
         _object = self.primary_expression()
-        while self._lookahead.type == t.DOT or self._lookahead.type == t.LSQB:
-            # MemberExpression '.' Identifier
-            if self._lookahead.type == t.DOT:
-                self._eat(t.DOT)
+        while self._lookahead.type == T.DOT or self._lookahead.type == T.LSQB:
+            if self._lookahead.type == T.DOT:
+                self._eat(T.DOT)
                 _property = self.identifier()
                 _object = {
                     'type': 'MemberExpression',
@@ -641,10 +640,10 @@ class Parser:
                     'property': _property
                 }
 
-            if self._lookahead.type == t.LSQB:
-                self._eat(t.LSQB)
+            if self._lookahead.type == T.LSQB:
+                self._eat(T.LSQB)
                 _property = self.expression()
-                self._eat(t.RSQB)
+                self._eat(T.RSQB)
                 _object = {
                     'type': 'MemberExpression',
                     'computed': True,
@@ -659,7 +658,7 @@ class Parser:
           : IDENTIFIER
           ;
         """
-        name = self._eat(t.IDENTIFIER).value
+        name = self._eat(T.IDENTIFIER).value
         return {
             'type': 'Identifier',
             'name': name
@@ -676,7 +675,7 @@ class Parser:
 
     @staticmethod
     def _is_assignment_operator(token_type) -> bool:
-        return token_type in [t.SIMPLE_ASSIGN, t.COMPLEX_ASSIGN]
+        return token_type in [T.SIMPLE_ASSIGN, T.COMPLEX_ASSIGN]
 
     def assignment_operator(self) -> Token:
         """
@@ -685,9 +684,9 @@ class Parser:
           | COMPLEX_ASSIGN
           ;
         """
-        if self._lookahead.type == t.SIMPLE_ASSIGN:
-            return self._eat(t.SIMPLE_ASSIGN)
-        return self._eat(t.COMPLEX_ASSIGN)
+        if self._lookahead.type == T.SIMPLE_ASSIGN:
+            return self._eat(T.SIMPLE_ASSIGN)
+        return self._eat(T.COMPLEX_ASSIGN)
 
     def logical_OR_expression(self):
         """
@@ -700,7 +699,7 @@ class Parser:
           | LogicalORExpression
           ;
         """
-        return self._logical_expression('logical_AND_expression', t.OR)
+        return self._logical_expression('logical_AND_expression', T.OR)
 
     def logical_AND_expression(self):
         """
@@ -713,7 +712,7 @@ class Parser:
           | LogicalANDExpression
           ;
         """
-        return self._logical_expression('equality_expression', t.AND)
+        return self._logical_expression('equality_expression', T.AND)
 
     def equality_expression(self):
         """
@@ -727,7 +726,7 @@ class Parser:
           | EqualityExpression EQUALITY_OPERATOR RelationalExpression
           ;
         """
-        return self._binary_expression('relational_expression', t.EQUALITY_OPERATOR)
+        return self._binary_expression('relational_expression', T.EQUALITY_OPERATOR)
 
     def relational_expression(self):
         """
@@ -743,7 +742,7 @@ class Parser:
           | AdditiveExpression RELATIONAL_OPERATOR RelationalExpression
           ;
         """
-        return self._binary_expression('additive_expression', t.RELATIONAL_OPERATOR)
+        return self._binary_expression('additive_expression', T.RELATIONAL_OPERATOR)
 
     def literal(self) -> dict:
         """
@@ -755,15 +754,15 @@ class Parser:
           ;
         """
         match self._lookahead.type:
-            case t.NUMBER:
+            case T.NUMBER:
                 return self.numeric_literal()
-            case t.STRING:
+            case T.STRING:
                 return self.string_literal()
-            case t.TRUE:
+            case T.TRUE:
                 return self.boolean_literal(True)
-            case t.FALSE:
+            case T.FALSE:
                 return self.boolean_literal(False)
-            case t.NULL:
+            case T.NULL:
                 return self.null_literal()
 
         raise SyntaxError('Literal: unexpected literal production')
@@ -775,7 +774,7 @@ class Parser:
           | 'false'
           ;
         """
-        self._eat(t.TRUE if value else t.FALSE)
+        self._eat(T.TRUE if value else T.FALSE)
         return {
             'type': 'BooleanLiteral',
             'value': value
@@ -787,7 +786,7 @@ class Parser:
           : 'null'
           ;
         """
-        self._eat(t.NULL)
+        self._eat(T.NULL)
         return {
             'type': 'NullLiteral',
             'value': None
@@ -797,7 +796,7 @@ class Parser:
         """
         StringLiteral
         """
-        token = self._eat(t.STRING)
+        token = self._eat(T.STRING)
         return {
             'type': 'StringLiteral',
             'value': token.value[1:-1]
@@ -807,13 +806,13 @@ class Parser:
         """
         NumericLiteral
         """
-        token = self._eat(t.NUMBER)
+        token = self._eat(T.NUMBER)
         return {
             'type': 'NumericLiteral',
             'value': int(token.value)
         }
 
-    def _eat(self, token_type: t) -> Token:
+    def _eat(self, token_type: T) -> Token:
         token = self._lookahead
         if token is None:
             raise SyntaxError(f'Unexpected end of input, expected: {token_type}')

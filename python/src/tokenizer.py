@@ -1,9 +1,9 @@
 import re
 from typing import NamedTuple
-from enum import Enum, auto
+from enum import IntEnum, auto
 
 
-class TokenType(Enum):
+class TokenType(IntEnum):
     STRING = auto()
     NUMBER = auto()
     IDENTIFIER = auto()
