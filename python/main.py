@@ -4,6 +4,7 @@ import sys
 from argparse import ArgumentParser, Namespace
 from src.parser import Parser
 
+
 def arguments() -> Namespace:
     p = ArgumentParser(description='Parse letter files.')
     p.add_argument('-e', '--expression', help='parse expression')
@@ -12,11 +13,14 @@ def arguments() -> Namespace:
     args = p.parse_args()
     return args
 
+
 def dumper(format, ast):
     if format == 'yaml':
         return yaml.dump(ast, sort_keys=False)
     else:
         return json.dumps(ast, indent=2, sort_keys=False)
+
+
 def main():
     args = arguments()
     if args.expression:
