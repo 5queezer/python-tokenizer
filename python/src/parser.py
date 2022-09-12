@@ -1,5 +1,4 @@
 from src.tokenizer import Tokenizer, TokenType as t, Token
-import tokenize
 
 
 class Parser:
@@ -153,7 +152,6 @@ class Parser:
             'argument': argument
         }
 
-
     def iteration_statement(self):
         """
         IterationStatement
@@ -207,7 +205,7 @@ class Parser:
             'test': test,
             'body': body
         }
-    
+
     def for_statement(self):
         """
         ForStatement
@@ -428,7 +426,6 @@ class Parser:
             }
         return left
 
-
     def unary_expression(self) -> dict:
         """
         UnaryExpression
@@ -446,10 +443,9 @@ class Parser:
             return {
                 'type': 'UnaryExpression',
                 'operator': operator,
-                'argument': self.unary_expression() # --x
+                'argument': self.unary_expression()  # --x
             }
         return self.left_hand_side_expression()
-
 
     def primary_expression(self) -> dict:
         """
@@ -598,7 +594,7 @@ class Parser:
             call_expression = self._call_expression(call_expression)
 
         return call_expression
-    
+
     def arguments(self):
         """
         Arguments
@@ -718,7 +714,7 @@ class Parser:
           ;
         """
         return self._logical_expression('equality_expression', t.AND)
-    
+
     def equality_expression(self):
         """
         EQUALITY_OPERATOR: ==, !=
@@ -781,8 +777,8 @@ class Parser:
         """
         self._eat(t.TRUE if value else t.FALSE)
         return {
-          'type': 'BooleanLiteral',
-          'value': value
+            'type': 'BooleanLiteral',
+            'value': value
         }
 
     def null_literal(self):
@@ -793,8 +789,8 @@ class Parser:
         """
         self._eat(t.NULL)
         return {
-          'type': 'NullLiteral',
-          'value': None
+            'type': 'NullLiteral',
+            'value': None
         }
 
     def string_literal(self) -> dict:
