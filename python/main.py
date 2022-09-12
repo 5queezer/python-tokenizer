@@ -8,7 +8,7 @@ def arguments() -> Namespace:
     p = ArgumentParser(description='Parse letter files.')
     p.add_argument('-e', '--expression', help='parse expression')
     p.add_argument('-f', '--file', help='parse file')
-    p.add_argument('--format', help='output format', default='yaml', choices='yaml, json')
+    p.add_argument('--format', help='output format', default='yaml', choices=['yaml', 'json'])
     args = p.parse_args()
     return args
 
