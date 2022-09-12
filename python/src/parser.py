@@ -54,6 +54,7 @@ class Parser:
           | IterationStatement
           | FunctionDeclaration
           | ReturnStatement
+          | ClassDeclaration
           ;
         """
         match self._lookahead.type:
@@ -65,6 +66,8 @@ class Parser:
                 return self.variable_statement()
             case t.DEF:
                 return self.function_declaration()
+            case t.CLASS:
+                return self.class_declaration()
             case t.RETURN:
                 return self.return_statement()
             case t.IF:
@@ -73,6 +76,32 @@ class Parser:
                 return self.iteration_statement()
             case _:
                 return self.expression_statement()
+
+    def class_declaration(self) -> dict:
+        """
+        ClassDeclaration
+          : 'class' Identifier OptClassExtends BlockStatement
+          ;
+        """
+        self._eat(t.CLASS)
+        id = self.identifier()
+        super_class = self.class_extends() if self._lookahead.type == t.EXTENDS else None
+        body = self.block_statement()
+        return {
+            'type': 'ClassDeclaration',
+            'id': id,
+            'superClass': super_class,
+            'body': body
+        }
+
+    def class_extends(self) -> dict:
+        """
+        ClassExtends
+          : 'extends' Identifier
+          ;
+        """
+        self._eat(t.EXTENDS)
+        return self.identifier()
 
     def function_declaration(self):
         """
@@ -428,6 +457,8 @@ class Parser:
           : Literal
           | ParanthesizedExpression
           | Identifier
+          | ThisExpression
+          | NewExpression
           ;
         """
         if self._is_literal(self._lookahead.type):
@@ -437,8 +468,47 @@ class Parser:
                 return self.paranthesized_expression()
             case t.IDENTIFIER:
                 return self.identifier()
+            case t.THIS:
+                return self.this_expression()
+            case t.NEW:
+                return self.new_expression()
             case _:
                 return self.left_hand_side_expression()
+
+    def new_expression(self):
+        """
+        NewExpression
+          : 'new' MemberExpression Arguments
+          ;
+        """
+        self._eat(t.NEW)
+        return {
+            'type': 'NewExpression',
+            'callee': self.member_expression(),
+            'arguments': self.arguments()
+        }
+
+    def this_expression(self) -> dict:
+        """
+        ThisExpression
+          : 'this'
+          ;
+        """
+        self._eat(t.THIS)
+        return {
+            'type': 'ThisExpression'
+        }
+
+    def super(self) -> dict:
+        """
+        Super
+          : 'super'
+          ;
+        """
+        self._eat(t.SUPER)
+        return {
+            'type': 'Super'
+        }
 
     @staticmethod
     def _is_literal(token_type: t) -> bool:
@@ -495,6 +565,9 @@ class Parser:
           | CallExpression
           ;
         """
+        if self._lookahead.type == t.SUPER:
+            return self._call_expression(self.super())
+
         member = self.member_expression()
 
         if self._lookahead.type == t.LPAR:

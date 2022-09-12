@@ -32,6 +32,11 @@ class TokenType(Enum):
     FOR = auto()
     DEF = auto()
     RETURN = auto()
+    CLASS = auto()
+    EXTENDS = auto()
+    SUPER = auto()
+    NEW = auto()
+    THIS = auto()
     COMMA = auto()
     DOT = auto()
 
@@ -88,6 +93,11 @@ spec: list[tuple[re.Pattern, TokenType or None]] = [
     (r'\bfor\b', TokenType.FOR),
     (r'\bdef\b', TokenType.DEF),
     (r'\breturn\b', TokenType.RETURN),
+    (r'\bclass\b', TokenType.CLASS),
+    (r'\bextends\b', TokenType.EXTENDS),
+    (r'\bsuper\b', TokenType.SUPER),
+    (r'\bnew\b', TokenType.NEW),
+    (r'\bthis\b', TokenType.THIS),
 
     # ----------------------------
     # Numbers

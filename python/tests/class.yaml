@@ -44,7 +44,7 @@
                         property:
                           type: Identifier
                           name: x
-                      operator: =
+                      operator: '='
                       right:
                         type: Identifier
                         name: x
@@ -59,7 +59,7 @@
                         property:
                           type: Identifier
                           name: 'y'
-                      operator: =
+                      operator: '='
                       right:
                         type: Identifier
                         name: 'y'
@@ -151,7 +151,7 @@
                         property:
                           type: Identifier
                           name: z
-                      operator: =
+                      operator: '='
                       right:
                         type: Identifier
                         name: z
